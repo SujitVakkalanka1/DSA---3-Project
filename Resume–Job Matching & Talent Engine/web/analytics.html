@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talent Pool Analytics | Talent Engine</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page-frame">
+
+    <!-- Minimalist Navbar -->
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a href="/" class="nav-brand">
+          <div class="brand-dot"></div>
+          <span>TALENT ENGINE</span>
+        </a>
+
+        <button class="nav-mobile-toggle" aria-label="Toggle navigation">MENU ☰</button>
+
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/candidates" class="nav-link">Candidates</a></li>
+          <li><a href="/jobs" class="nav-link">Jobs</a></li>
+          <li><a href="/match" class="nav-link">Matching</a></li>
+          <li><a href="/assignments" class="nav-link">Assignments</a></li>
+          <li><a href="/team-optimizer" class="nav-link">Team Optimizer</a></li>
+          <li><a href="/analytics" class="nav-link active">Analytics</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <button onclick="loadAnalytics()" class="btn btn-primary btn-sm">Refresh Metrics ↺</button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Talent Pool Analytics</h1>
+          <p class="page-subtitle">Deterministic aggregation computed live across in-memory candidates, requisitions, and inverted indices.</p>
+        </div>
+        <button onclick="loadAnalytics()" class="btn btn-outline btn-sm">↺ Refresh Data</button>
+      </div>
+
+      <!-- Stat Strip -->
+      <div class="stat-strip">
+        <div class="stat-box">
+          <div class="stat-label">Total Candidates</div>
+          <div class="stat-val lime" id="an-candidates">--</div>
+          <div class="stat-sub">Active in-memory profiles</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">Active Openings</div>
+          <div class="stat-val" id="an-jobs">--</div>
+          <div class="stat-sub">Requisition postings</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">Mean Compatibility</div>
+          <div class="stat-val lime" id="an-avg-match">--%</div>
+          <div class="stat-sub">Pairwise weighted score</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">Skill Coverage</div>
+          <div class="stat-val lime" id="an-coverage">--%</div>
+          <div class="stat-sub">Requirements met by pool</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">Indexed Skills</div>
+          <div class="stat-val" id="an-skills">--</div>
+          <div class="stat-sub">HashMap vocabulary entries</div>
+        </div>
+      </div>
+
+      <!-- MODULE 6 TECHNICAL BENCHMARKS (Parallel Streams & Randomized QuickSort) -->
+      <div class="card" style="border-color: rgba(236, 242, 35, 0.35); background: radial-gradient(circle at 90% 10%, rgba(18, 74, 21, 0.28) 0%, rgba(10, 19, 10, 0.95) 70%); margin-bottom: 2rem;">
+        <div class="card-header">
+          <div>
+            <span class="skill-badge" style="color:var(--signal-lime);border-color:var(--signal-lime-border);">Module 6 Randomized &amp; Parallel</span>
+            <h2 class="card-title" style="margin-top:0.3rem;">Parallel Streams &amp; Randomized QuickSort Technical Inspector</h2>
+            <p class="card-desc">Empirical multi-core benchmark and randomized partition performance audit.</p>
+          </div>
+          <button id="run-benchmark-btn" class="btn btn-primary btn-sm" onclick="runParallelBenchmark()">Run Live Benchmark ⚡</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+          
+          <!-- Parallel Streams Result -->
+          <div style="background: var(--bg-surface); padding: 1.25rem; border-radius: var(--radius-xs); border: 1px solid var(--border-subtle);">
+            <div style="font-weight:700; color:var(--text-cream); margin-bottom:0.4rem;">
+              Java ForkJoinPool Parallel Streams Execution
+            </div>
+            <p style="font-size:0.82rem; color:var(--text-cream-dim); line-height:1.5; margin-bottom:1rem;">
+              Parallel stream speedup is <strong>workload, dataset size, and CPU-core dependent</strong>. 
+              Below are measured empirical timings for sequential vs parallel matrix evaluation.
+            </p>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; font-family:var(--font-mono); font-size:0.82rem;">
+              <div style="background:rgba(0,0,0,0.4); padding:0.6rem; border-radius:2px;">
+                <div style="color:var(--text-muted); font-size:0.7rem;">AVAILABLE CORES</div>
+                <div id="bench-cores" style="color:var(--signal-lime); font-weight:700; font-size:1.2rem;">--</div>
+              </div>
+              <div style="background:rgba(0,0,0,0.4); padding:0.6rem; border-radius:2px;">
+                <div style="color:var(--text-muted); font-size:0.7rem;">MEASURED SPEEDUP</div>
+                <div id="bench-speedup" style="color:var(--signal-lime); font-weight:700; font-size:1.2rem;">--x</div>
+              </div>
+              <div style="background:rgba(0,0,0,0.4); padding:0.6rem; border-radius:2px;">
+                <div style="color:var(--text-muted); font-size:0.7rem;">SEQUENTIAL TIME</div>
+                <div id="bench-seq" style="color:var(--text-cream); font-weight:700;">-- ms</div>
+              </div>
+              <div style="background:rgba(0,0,0,0.4); padding:0.6rem; border-radius:2px;">
+                <div style="color:var(--text-muted); font-size:0.7rem;">PARALLEL TIME</div>
+                <div id="bench-par" style="color:var(--accent-green); font-weight:700;">-- ms</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Randomized QuickSort Audit -->
+          <div style="background: var(--bg-surface); padding: 1.25rem; border-radius: var(--radius-xs); border: 1px solid var(--border-subtle);">
+            <div style="font-weight:700; color:var(--text-cream); margin-bottom:0.4rem;">
+              Randomized QuickSort Match Ranking
+            </div>
+            <p style="font-size:0.82rem; color:var(--text-cream-dim); line-height:1.5; margin-bottom:0.75rem;">
+              Sorts candidate compatibility rankings with random pivot selection (`ThreadLocalRandom`).
+            </p>
+
+            <div style="display:flex; flex-direction:column; gap:0.5rem; font-family:var(--font-mono); font-size:0.8rem;">
+              <div style="background:rgba(0,0,0,0.4); padding:0.5rem 0.75rem; border-radius:2px; border-left:3px solid var(--signal-lime);">
+                Expected Time Complexity: <strong style="color:var(--signal-lime);">O(N log N)</strong>
+              </div>
+              <div style="background:rgba(0,0,0,0.4); padding:0.5rem 0.75rem; border-radius:2px; border-left:3px solid var(--alert-red-light);">
+                Worst-Case Time Complexity: <strong style="color:var(--alert-red-light);">O(N²)</strong>
+              </div>
+              <div style="font-size:0.78rem; color:var(--text-muted); line-height:1.4; margin-top:2px;">
+                Rationale: Deterministic pivot degrades on pre-sorted arrays. Random pivot selection makes consistently bad partitions extraordinarily unlikely (&sim; 2^N / N!).
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Two-column charts layout -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 1.5rem;">
+        
+        <!-- Skill Frequency Distribution (Bar Chart) -->
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Skill Frequency Distribution</h2>
+              <p class="card-desc">Top in-demand technical competencies across postings lists.</p>
+            </div>
+          </div>
+          <div id="skills-freq-bars" style="display: flex; flex-direction: column; gap: 0.85rem; padding: 0.5rem 0;">
+            <div style="color:var(--text-muted); font-size:0.85rem;">Calculating frequency distribution...</div>
+          </div>
+        </div>
+
+        <!-- Candidate Availability & Postings Explorer -->
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Candidate Availability Breakdown</h2>
+              <p class="card-desc">Notice period distribution across candidate pool.</p>
+            </div>
+          </div>
+          <div id="availability-breakdown" style="display: flex; flex-direction: column; gap: 0.75rem; padding: 0.5rem 0;">
+            <div style="color:var(--text-muted); font-size:0.85rem;">Calculating availability...</div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Minimalist Footer -->
+    <footer class="footer">
+      <div class="container footer-content">
+        <div class="footer-left">
+          <div class="footer-brand">
+            <div class="brand-dot"></div>
+            <span>TALENT ENGINE</span>
+          </div>
+          <p style="color:var(--text-muted);font-size:0.82rem;max-width:400px;margin-top:0.3rem;">
+            A deterministic candidate-to-role matching and talent-marketplace engine built with pure Java Standard Library.
+          </p>
+        </div>
+
+        <ul class="footer-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/candidates">Candidates</a></li>
+          <li><a href="/jobs">Jobs</a></li>
+          <li><a href="/match">Matching</a></li>
+          <li><a href="/assignments">Assignments</a></li>
+          <li><a href="/team-optimizer">Team Optimizer</a></li>
+          <li><a href="/analytics">Analytics</a></li>
+          <li><a href="/architecture">Technical Details</a></li>
+        </ul>
+      </div>
+
+      <div class="container footer-academic">
+        <div>
+          <span>Data Structures &amp; Algorithms - 3 (25CS2103E)</span> &bull;
+          <span>Team 14 &bull; Section 10</span> &bull;
+          <span>KL University, Hyderabad</span>
+        </div>
+        <div>
+          <span>Pure Java SE 17 &bull; Zero External Frameworks</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    async function loadAnalytics() {
+      try {
+        const data = await API.getAnalytics();
+
+        document.getElementById('an-candidates').innerText = data.totalCandidates;
+        document.getElementById('an-jobs').innerText = data.totalJobs;
+        document.getElementById('an-avg-match').innerText = data.averageMatch.toFixed(1) + '%';
+        document.getElementById('an-coverage').innerText = data.skillCoverage.toFixed(1) + '%';
+        document.getElementById('an-skills').innerText = data.uniqueSkillsCount;
+
+        // Render Skill Frequency Bars
+        const barsEl = document.getElementById('skills-freq-bars');
+        if (!data.topSkills || !data.topSkills.length) {
+          barsEl.innerHTML = '<div style="color:var(--text-muted);">No skills indexed yet.</div>';
+        } else {
+          const maxCount = Math.max(...data.topSkills.map(s => s.count), 1);
+          barsEl.innerHTML = data.topSkills.slice(0, 8).map(s => {
+            const pct = Math.round((s.count / maxCount) * 100);
+            return `
+              <div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-family:var(--font-mono); font-size:0.78rem;">
+                  <strong style="color:var(--text-cream);">${s.skill}</strong>
+                  <span style="color:var(--signal-lime); font-weight:700;">${s.count} mentions</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.06); height:7px; border-radius:3px; overflow:hidden;">
+                  <div style="background:linear-gradient(90deg, var(--brand-forest), var(--signal-lime)); width:${pct}%; height:100%;"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        // Render Availability Breakdown
+        const availEl = document.getElementById('availability-breakdown');
+        if (!data.availability || !data.availability.length) {
+          availEl.innerHTML = '<div style="color:var(--text-muted);">No availability data.</div>';
+        } else {
+          const totalAvail = data.availability.reduce((sum, a) => sum + a.count, 0) || 1;
+          availEl.innerHTML = data.availability.map(a => {
+            const pct = Math.round((a.count / totalAvail) * 100);
+            return `
+              <div style="background:var(--bg-surface); padding:0.75rem 1rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong style="color:var(--text-cream);">${a.status}</strong>
+                  <div style="font-size:0.74rem; color:var(--text-muted); margin-top:2px;">${a.count} applicants (${pct}%)</div>
+                </div>
+                <div style="font-family:var(--font-mono); font-weight:700; color:var(--signal-lime);">${pct}%</div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        runParallelBenchmark();
+      } catch (err) {
+        UI.toast('Failed to load analytics: ' + err.message, 'error');
+      }
+    }
+
+    async function runParallelBenchmark() {
+      try {
+        const bench = await API.getParallelBenchmark();
+        document.getElementById('bench-cores').innerText = bench.availableProcessors;
+        document.getElementById('bench-speedup').innerText = bench.speedupFactor.toFixed(2) + 'x';
+        document.getElementById('bench-seq').innerText = bench.sequentialTimeMs.toFixed(2) + ' ms';
+        document.getElementById('bench-par').innerText = bench.parallelTimeMs.toFixed(2) + ' ms';
+      } catch (err) {
+        console.error('Benchmark failed:', err);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadAnalytics);
+  </script>
+</body>
+</html>

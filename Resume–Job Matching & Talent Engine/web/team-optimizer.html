@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Skill Optimizer | Talent Engine</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page-frame">
+
+    <!-- Minimalist Navbar -->
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a href="/" class="nav-brand">
+          <div class="brand-dot"></div>
+          <span>TALENT ENGINE</span>
+        </a>
+
+        <button class="nav-mobile-toggle" aria-label="Toggle navigation">MENU ☰</button>
+
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/candidates" class="nav-link">Candidates</a></li>
+          <li><a href="/jobs" class="nav-link">Jobs</a></li>
+          <li><a href="/match" class="nav-link">Matching</a></li>
+          <li><a href="/assignments" class="nav-link">Assignments</a></li>
+          <li><a href="/team-optimizer" class="nav-link active">Team Optimizer</a></li>
+          <li><a href="/analytics" class="nav-link">Analytics</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <button onclick="runOptimization()" class="btn btn-primary btn-sm">Optimize Team →</button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Team Skill Optimizer</h1>
+          <p class="page-subtitle">
+            Optimize your project workforce by comparing the <strong>Optimal Staffing Engine</strong> 
+            against the <strong>Fast Approximation Engine</strong>.
+          </p>
+        </div>
+        <div>
+          <button onclick="runOptimization()" class="btn btn-primary btn-sm">Run Both Optimizers →</button>
+        </div>
+      </div>
+
+      <!-- Skill Universe Configuration -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Required Project Skills (Universe U)</h2>
+            <p class="card-desc">Select skills or pick presets to define the required project capabilities.</p>
+          </div>
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+            <button class="btn btn-outline btn-sm" onclick="applyPreset('fullstack')">Fullstack Web</button>
+            <button class="btn btn-outline btn-sm" onclick="applyPreset('cloud')">Cloud DevOps</button>
+            <button class="btn btn-outline btn-sm" onclick="applyPreset('data')">Data Science</button>
+          </div>
+        </div>
+
+        <!-- Skill Chips Toggle Grid -->
+        <div style="margin-bottom: 1.25rem;">
+          <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.4rem;">
+            Click to Toggle Skills into Project Universe:
+          </div>
+          <div id="skills-toggle-grid" style="display:flex; flex-wrap:wrap; gap:0.35rem;"></div>
+        </div>
+
+        <!-- Active Selected Universe Box -->
+        <div style="background:var(--bg-surface); padding: 1rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+            <span style="font-size:0.75rem; font-family:var(--font-mono); color:var(--text-muted); text-transform:uppercase;">
+              SELECTED UNIVERSE U (<span id="active-skill-count" style="color:var(--signal-lime); font-weight:700;">0</span> SKILLS)
+            </span>
+            <button class="btn btn-outline btn-sm" style="padding:2px 7px; font-size:0.72rem;" onclick="clearSelectedSkills()">Clear All</button>
+          </div>
+          <div id="active-skills-chips" style="display:flex; flex-wrap:wrap; gap:0.35rem;">
+            <span style="color:var(--text-muted); font-size:0.82rem;">No skills selected yet. Click skills above or choose a preset.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Side-by-Side Comparison Section: Exact Bitmask DP vs Greedy Set Cover -->
+      <div id="results-container" style="display: none; margin-bottom: 2rem;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+          
+          <!-- Column 1: Exact Bitmask DP (Module 3) -->
+          <div class="card" style="border-color: rgba(236, 242, 35, 0.35); background: radial-gradient(circle at 10% 10%, rgba(18, 74, 21, 0.25) 0%, rgba(10, 19, 10, 0.95) 75%);">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title" style="margin-top:0.3rem;">Optimal Staffing Engine</h3>
+                <p class="card-desc">Evaluates all combinations for absolute minimum team size.</p>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Optimal Team Size</div>
+                <div id="exact-team-size" style="font-size:2.4rem; font-weight:900; font-family:var(--font-mono); color:var(--signal-lime); line-height:1;">
+                  --
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:1rem; margin-bottom:1rem; font-family:var(--font-mono); font-size:0.76rem; color:var(--text-cream-dim);">
+              <div>Status: <strong id="exact-status" style="color:var(--accent-green);">Mathematical Optimum</strong></div>
+              <div>States: <strong id="exact-states">--</strong></div>
+              <div>Time: <strong id="exact-time">-- ms</strong></div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+              <div style="font-family:var(--font-mono); font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.4rem;">
+                Exact Minimal Team Roster
+              </div>
+              <div id="exact-team-roster" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
+            </div>
+          </div>
+
+          <!-- Column 2: Greedy Set Cover Approximation (Module 5) -->
+          <div class="card" style="border-color: var(--border-strong);">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title" style="margin-top:0.3rem;">Fast Approximation Engine</h3>
+                <p class="card-desc">Rapidly finds a near-optimal team for large candidate pools.</p>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Approx Team Size</div>
+                <div id="greedy-team-size" style="font-size:2.4rem; font-weight:900; font-family:var(--font-mono); color:var(--text-cream); line-height:1;">
+                  --
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:1rem; margin-bottom:1rem; font-family:var(--font-mono); font-size:0.76rem; color:var(--text-cream-dim);">
+              <div>Coverage: <strong id="greedy-coverage" style="color:var(--signal-lime);">--%</strong></div>
+              <div>Uncovered: <strong id="greedy-uncovered-count">0</strong></div>
+              <div>Strategy: <strong>Max Marginal Contribution</strong></div>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+              <div style="font-family:var(--font-mono); font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.4rem;">
+                Step-by-Step Greedy Trace
+              </div>
+              <div id="greedy-steps-trace" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Minimalist Footer -->
+    <footer class="footer">
+      <div class="container footer-content">
+        <div class="footer-left">
+          <div class="footer-brand">
+            <div class="brand-dot"></div>
+            <span>TALENT ENGINE</span>
+          </div>
+          <p style="color:var(--text-muted);font-size:0.82rem;max-width:400px;margin-top:0.3rem;">
+            A deterministic candidate-to-role matching and talent-marketplace engine built with pure Java Standard Library.
+          </p>
+        </div>
+
+        <ul class="footer-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/candidates">Candidates</a></li>
+          <li><a href="/jobs">Jobs</a></li>
+          <li><a href="/match">Matching</a></li>
+          <li><a href="/assignments">Assignments</a></li>
+          <li><a href="/team-optimizer">Team Optimizer</a></li>
+          <li><a href="/analytics">Analytics</a></li>
+          <li><a href="/architecture">Technical Details</a></li>
+        </ul>
+      </div>
+
+    </footer>
+
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    const ALL_SKILLS = [
+      "Java", "Python", "JavaScript", "TypeScript", "SQL", "PostgreSQL", 
+      "HTML", "CSS", "React", "Node.js", "Git", "Docker", "Kubernetes", 
+      "AWS", "DSA", "Machine Learning", "Statistics", "REST API"
+    ];
+
+    const PRESETS = {
+      fullstack: ["Java", "JavaScript", "HTML", "CSS", "SQL", "Git"],
+      cloud: ["Docker", "Kubernetes", "AWS", "Java", "Git"],
+      data: ["Python", "SQL", "Statistics", "Machine Learning", "DSA"]
+    };
+
+    let selectedSkills = new Set(["Java", "SQL", "DSA", "HTML", "CSS", "Git"]);
+
+    function initSkillGrid() {
+      const grid = document.getElementById('skills-toggle-grid');
+      grid.innerHTML = ALL_SKILLS.map(s => {
+        const active = selectedSkills.has(s);
+        return `<button class="btn btn-sm ${active ? 'btn-primary' : 'btn-outline'}" style="margin:2px;" onclick="toggleSkill('${s}')">${s}</button>`;
+      }).join('');
+      renderActiveChips();
+    }
+
+    function toggleSkill(s) {
+      if (selectedSkills.has(s)) {
+        selectedSkills.delete(s);
+      } else {
+        selectedSkills.add(s);
+      }
+      initSkillGrid();
+    }
+
+    function applyPreset(presetKey) {
+      if (PRESETS[presetKey]) {
+        selectedSkills = new Set(PRESETS[presetKey]);
+        initSkillGrid();
+      }
+    }
+
+    function clearSelectedSkills() {
+      selectedSkills.clear();
+      initSkillGrid();
+    }
+
+    function renderActiveChips() {
+      const el = document.getElementById('active-skills-chips');
+      document.getElementById('active-skill-count').innerText = selectedSkills.size;
+
+      if (!selectedSkills.size) {
+        el.innerHTML = '<span style="color:var(--text-muted); font-size:0.82rem;">No skills selected. Click buttons above.</span>';
+        return;
+      }
+
+      el.innerHTML = Array.from(selectedSkills).map(s => `
+        <span class="skill-badge matched">
+          ${s} <span style="cursor:pointer;margin-left:4px;" onclick="toggleSkill('${s}')">&times;</span>
+        </span>
+      `).join('');
+    }
+
+    async function runOptimization() {
+      const skillsArr = Array.from(selectedSkills);
+      if (!skillsArr.length) {
+        UI.toast('Please select at least one skill.', 'error');
+        return;
+      }
+
+      try {
+        const [exactRes, greedyRes] = await Promise.all([
+          API.optimizeTeamBitmask(skillsArr),
+          API.optimizeTeam(skillsArr)
+        ]);
+
+        document.getElementById('results-container').style.display = 'block';
+
+        // 1. Render Exact Bitmask DP Results
+        const exactTeam = (exactRes && exactRes.selectedTeam) ? exactRes.selectedTeam : [];
+        document.getElementById('exact-team-size').innerText = exactRes ? (exactRes.optimalTeamSize ?? exactTeam.length) : '--';
+        document.getElementById('exact-status').innerText = (exactRes && exactRes.exactFound) ? 'Mathematical Optimum' : 'Partial Cover';
+        document.getElementById('exact-states').innerText = exactRes ? (exactRes.totalStatesEvaluated ?? '--') : '--';
+        document.getElementById('exact-time').innerText = exactRes ? (exactRes.executionTimeMs + ' ms') : '-- ms';
+
+        const exactRosterEl = document.getElementById('exact-team-roster');
+        if (exactTeam.length > 0) {
+          exactRosterEl.innerHTML = exactTeam.map((c, i) => `
+            <div style="background:var(--bg-surface);padding:0.75rem;border-radius:var(--radius-xs);border:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <strong style="color:var(--text-cream);">${c.name || 'Candidate'}</strong>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">${c.experienceYears || 0} yrs exp &bull; ${c.availability || 'Immediate'}</div>
+              </div>
+              <div>${UI.renderSkillChips(c.skills ? c.skills.slice(0, 4) : (c.rawSkills ? c.rawSkills.slice(0, 4) : []))}</div>
+            </div>
+          `).join('');
+        } else {
+          exactRosterEl.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem;padding:0.5rem;">No candidates needed or available.</div>';
+        }
+
+        // 2. Render Greedy Set Cover Results
+        const steps = (greedyRes && (greedyRes.steps || greedyRes.selectedSteps)) ? (greedyRes.steps || greedyRes.selectedSteps) : [];
+        const greedyTeam = (greedyRes && greedyRes.selectedTeam) ? greedyRes.selectedTeam : [];
+        document.getElementById('greedy-team-size').innerText = greedyRes ? (greedyRes.teamSize ?? greedyTeam.length) : '--';
+        document.getElementById('greedy-coverage').innerText = greedyRes ? (greedyRes.coveragePercentage !== undefined ? greedyRes.coveragePercentage.toFixed(1) + '%' : '100.0%') : '--%';
+        document.getElementById('greedy-uncovered-count').innerText = greedyRes && greedyRes.uncoveredSkills ? greedyRes.uncoveredSkills.length : 0;
+
+        const traceEl = document.getElementById('greedy-steps-trace');
+        if (steps.length > 0) {
+          traceEl.innerHTML = steps.map(st => `
+            <div style="background:var(--bg-surface);padding:0.75rem;border-radius:var(--radius-xs);border:1px solid var(--border-subtle);">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--signal-lime);font-weight:700;">STEP ${st.stepNumber || 1}</span>
+                <strong style="color:var(--text-cream);">${st.candidate ? st.candidate.name : 'Selected Candidate'}</strong>
+              </div>
+              <div style="font-size:0.78rem;color:var(--text-cream-dim);margin-top:4px;">${st.rationale || ''}</div>
+            </div>
+          `).join('');
+        } else {
+          traceEl.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem;padding:0.5rem;">All selected skills already covered.</div>';
+        }
+
+        document.getElementById('results-container').scrollIntoView({ behavior: 'smooth' });
+      } catch (err) {
+        console.error('Optimization error:', err);
+        UI.toast('Failed to optimize team: ' + err.message, 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initSkillGrid();
+      runOptimization();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "candidates": [
+    {"id":"C-101","name":"Aarav Shah","experienceYears":2,"availability":"Immediate","isSample":true,"rawSkills":["Java","DSA","SQL","Git"],"skills":["Java","DSA","SQL","Git"]},
+    {"id":"C-102","name":"Maya Patel","experienceYears":3,"availability":"Immediate","isSample":true,"rawSkills":["HTML","CSS","Javascript","React"],"skills":["HTML","CSS","JavaScript","React"]},
+    {"id":"C-103","name":"Rahul Kumar","experienceYears":2,"availability":"2 Weeks","isSample":true,"rawSkills":["Java","SQL","Git","Docker"],"skills":["Java","SQL","Git","Docker"]},
+    {"id":"C-104","name":"Ananya Sharma","experienceYears":3,"availability":"Immediate","isSample":true,"rawSkills":["Pyhton","SQL","Statistics","Data Analysis"],"skills":["Python","SQL","Statistics","Data Analysis"]},
+    {"id":"C-105","name":"Vikram Singh","experienceYears":4,"availability":"1 Month","isSample":true,"rawSkills":["Python","Docker","Kubernetes","AWS"],"skills":["Python","Docker","Kubernetes","AWS"]},
+    {"id":"C-106","name":"Priya Nair","experienceYears":3,"availability":"Immediate","isSample":true,"rawSkills":["Javascript","Typescript","React","Nodejs"],"skills":["JavaScript","TypeScript","React","Node.js"]},
+    {"id":"C-107","name":"Rohan Mehta","experienceYears":2,"availability":"Immediate","isSample":true,"rawSkills":["C++","DSA","Algorithms","Linux"],"skills":["C++","DSA","Algorithms","Linux"]},
+    {"id":"C-108","name":"Sneha Verma","experienceYears":3,"availability":"2 Weeks","isSample":true,"rawSkills":["Java","Spring Boot","Postgres","REST API"],"skills":["Java","Spring Boot","PostgreSQL","REST API"]}
+  ],
+  "jobs": [
+    {"id":"J-101","title":"Java Backend Developer","department":"Backend Engineering","minExperienceYears":2,"description":"Build scalable enterprise backend services and database access pipelines.","isSample":true,"requiredSkills":["Java","DSA","SQL","Git"]},
+    {"id":"J-102","title":"Frontend Engineer","department":"UI/UX Engineering","minExperienceYears":2,"description":"Develop modern, responsive web interfaces with strong UX fundamentals.","isSample":true,"requiredSkills":["HTML","CSS","JavaScript","React"]},
+    {"id":"J-103","title":"Data Analyst","department":"Data & Analytics","minExperienceYears":2,"description":"Analyze talent and performance metrics, design queries and statistical reports.","isSample":true,"requiredSkills":["Python","SQL","Statistics","Data Analysis"]},
+    {"id":"J-104","title":"Cloud DevOps Engineer","department":"Infrastructure","minExperienceYears":3,"description":"Manage deployment pipelines, container orchestration, and cloud infrastructure.","isSample":true,"requiredSkills":["Docker","Kubernetes","AWS","Linux"]},
+    {"id":"J-105","title":"Fullstack Developer","department":"Core Engineering","minExperienceYears":3,"description":"End-to-end feature delivery across frontend and service layers.","isSample":true,"requiredSkills":["React","Node.js","TypeScript","PostgreSQL"]},
+    {"id":"J-106","title":"Mobile App Developer","department":"Mobile Engineering","minExperienceYears":2,"description":"Design and build advanced applications for iOS and Android platforms.","isSample":true,"requiredSkills":["Swift","Kotlin","React Native","Git"]},
+    {"id":"J-107","title":"Machine Learning Engineer","department":"Data & Analytics","minExperienceYears":4,"description":"Design and implement machine learning models and AI systems.","isSample":true,"requiredSkills":["Python","TensorFlow","PyTorch","SQL"]},
+    {"id":"J-108","title":"Security Engineer","department":"Security","minExperienceYears":3,"description":"Ensure infrastructure and application security through threat modeling and penetration testing.","isSample":true,"requiredSkills":["Python","Linux","Networking","Cryptography"]},
+    {"id":"J-109","title":"QA Automation Engineer","department":"Quality Assurance","minExperienceYears":2,"description":"Build automated test suites and ensure high software quality standards.","isSample":true,"requiredSkills":["Selenium","Java","Cypress"]},
+    {"id":"J-110","title":"Site Reliability Engineer (SRE)","department":"Infrastructure","minExperienceYears":4,"description":"Maintain highly available, scalable, and reliable production systems.","isSample":true,"requiredSkills":["Linux","Kubernetes","Terraform","C#"]},
+    {"id":"J-111","title":"Game Developer","department":"Game Design","minExperienceYears":2,"description":"Develop robust game logic and engines for multi-platform deployment.","isSample":true,"requiredSkills":["C++","C#","Unity","Unreal Engine"]},
+    {"id":"J-112","title":"Blockchain Developer","department":"Web3 Engineering","minExperienceYears":3,"description":"Design and develop decentralized applications and smart contracts.","isSample":true,"requiredSkills":["Solidity","Web3.js","Rust","Cryptography"]},
+    {"id":"J-113","title":"Embedded Systems Engineer","department":"Hardware & IoT","minExperienceYears":3,"description":"Write low-level code for microcontrollers and IoT devices.","isSample":true,"requiredSkills":["C#","C++","Microcontrollers","RTOS"]},
+    {"id":"J-114","title":"Systems Engineer","department":"Core Engineering","minExperienceYears":4,"description":"Develop performant, low-level OS components and networking modules.","isSample":true,"requiredSkills":["C#","C++","Rust","Linux"]},
+    {"id":"J-115","title":"Database Administrator","department":"Infrastructure","minExperienceYears":5,"description":"Optimize, secure, and maintain enterprise database systems.","isSample":true,"requiredSkills":["SQL","PostgreSQL","Oracle","MongoDB"]},
+    {"id":"J-116","title":"Cloud Architect","department":"Infrastructure","minExperienceYears":8,"description":"Design resilient and scalable cloud architectures and strategies.","isSample":true,"requiredSkills":["AWS","Azure","C#","System Architecture"]}
+  ]
+}

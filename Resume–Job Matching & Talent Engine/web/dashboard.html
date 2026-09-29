@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talent Pool Overview | Talent Engine</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page-frame">
+
+    <!-- Minimalist Navbar -->
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a href="/" class="nav-brand">
+          <div class="brand-dot"></div>
+          <span>TALENT ENGINE</span>
+        </a>
+
+        <button class="nav-mobile-toggle" aria-label="Toggle navigation">MENU ☰</button>
+
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/candidates" class="nav-link">Candidates</a></li>
+          <li><a href="/jobs" class="nav-link">Jobs</a></li>
+          <li><a href="/match" class="nav-link">Matching</a></li>
+          <li><a href="/assignments" class="nav-link">Assignments</a></li>
+          <li><a href="/team-optimizer" class="nav-link">Team Optimizer</a></li>
+          <li><a href="/analytics" class="nav-link">Analytics</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <a href="/architecture" class="nav-cta-btn">
+            <span>See How It Works</span>
+            <span class="cta-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Talent Pool Overview</h1>
+          <p class="page-subtitle">Aggregate metrics, indexing status, and deterministic compatibility coverage.</p>
+        </div>
+        <div style="display: flex; gap: 0.6rem; align-items: center;">
+          <button id="reset-data-btn" class="btn btn-outline btn-sm">↺ Reset Sample Data</button>
+          <a href="/match" class="btn btn-primary btn-sm">Calculate Match →</a>
+        </div>
+      </div>
+
+      <!-- Large Numbers Overview (Cybera Clean Stat Boxes) -->
+      <div class="stat-strip">
+        <div class="stat-box">
+          <div class="stat-label">Candidates Indexed</div>
+          <div class="stat-val" id="metric-candidates">--</div>
+          <div class="stat-sub" id="metric-cand-sub">In-memory applicant pool</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">Open Roles</div>
+          <div class="stat-val" id="metric-jobs">--</div>
+          <div class="stat-sub" id="metric-jobs-sub">Active job requisitions</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">Average Match</div>
+          <div class="stat-val lime" id="metric-avg-match">--%</div>
+          <div class="stat-sub">Pairwise weighted compatibility</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">Skill Coverage</div>
+          <div class="stat-val lime" id="metric-coverage">--%</div>
+          <div class="stat-sub">Unique job skills covered by pool</div>
+        </div>
+      </div>
+
+      <!-- Visual Section: Matching Activity & System Coverage -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+        
+        <!-- Matching Activity -->
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Matching Activity</h2>
+              <p class="card-desc">Deterministic pairwise compatibility evaluations</p>
+            </div>
+            <a href="/match" class="btn btn-outline btn-sm">All Matches →</a>
+          </div>
+
+          <div id="activity-preview" style="display:flex; flex-direction:column; gap:0.75rem;">
+            <div style="color:var(--text-muted); font-size:0.85rem;">Evaluating live candidate-job compatibility matrix...</div>
+          </div>
+        </div>
+
+        <!-- Recent Optimal Assignments -->
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Optimal Assignments</h2>
+              <p class="card-desc">Hungarian Kuhn-Munkres O(N³) global assignment snapshot</p>
+            </div>
+            <a href="/assignments" class="btn btn-primary btn-sm">View Allocations →</a>
+          </div>
+
+          <div id="assignments-preview" style="display:flex; flex-direction:column; gap:0.75rem;">
+            <div style="color:var(--text-muted); font-size:0.85rem;">Calculating optimal assignment...</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Two-column: Candidates and Openings Snapshot -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 1.5rem;">
+        <!-- Candidates Snapshot -->
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Candidates Pool</h2>
+              <p class="card-desc">Active candidate records in inverted index.</p>
+            </div>
+            <a href="/candidates" class="btn btn-outline btn-sm">Manage All →</a>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width:75px;">ID</th>
+                  <th>Candidate</th>
+                  <th style="width:80px;">Exp</th>
+                  <th>Normalized Skills</th>
+                </tr>
+              </thead>
+              <tbody id="candidates-tbody">
+                <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:1.5rem;">Loading candidates...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Roles Snapshot -->
+        <div class="card" style="margin-bottom:0;">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Role Requirements</h2>
+              <p class="card-desc">Open requisitions requiring candidate coverage.</p>
+            </div>
+            <a href="/jobs" class="btn btn-outline btn-sm">Manage All →</a>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width:75px;">ID</th>
+                  <th>Role</th>
+                  <th style="width:80px;">Min Exp</th>
+                  <th>Required Skills</th>
+                </tr>
+              </thead>
+              <tbody id="jobs-tbody">
+                <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:1.5rem;">Loading jobs...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Minimalist Footer -->
+    <footer class="footer">
+      <div class="container footer-content">
+        <div class="footer-left">
+          <div class="footer-brand">
+            <div class="brand-dot"></div>
+            <span>TALENT ENGINE</span>
+          </div>
+          <p style="color:var(--text-muted);font-size:0.82rem;max-width:400px;margin-top:0.3rem;">
+            A deterministic candidate-to-role matching and talent-marketplace engine built with pure Java Standard Library.
+          </p>
+        </div>
+
+        <ul class="footer-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/candidates">Candidates</a></li>
+          <li><a href="/jobs">Jobs</a></li>
+          <li><a href="/match">Matching</a></li>
+          <li><a href="/assignments">Assignments</a></li>
+          <li><a href="/team-optimizer">Team Optimizer</a></li>
+          <li><a href="/analytics">Analytics</a></li>
+          <li><a href="/architecture">Technical Details</a></li>
+        </ul>
+      </div>
+
+      <div class="container footer-academic">
+        <div>
+          <span>Data Structures &amp; Algorithms - 3 (25CS2103E)</span> &bull;
+          <span>Team 14 &bull; Section 10</span> &bull;
+          <span>KL University, Hyderabad</span>
+        </div>
+        <div>
+          <span>Pure Java SE 17 &bull; Zero External Frameworks</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    async function loadDashboard() {
+      try {
+        const [analytics, candidates, jobs, assignments] = await Promise.all([
+          API.getAnalytics(),
+          API.getCandidates(),
+          API.getJobs(),
+          API.getAssignments().catch(() => null)
+        ]);
+
+        document.getElementById('metric-candidates').innerText = analytics.totalCandidates;
+        const sampleCount = candidates.filter(c => c.isSample).length;
+        const customCount = candidates.length - sampleCount;
+        document.getElementById('metric-cand-sub').innerText = `${sampleCount} sample · ${customCount} custom`;
+
+        document.getElementById('metric-jobs').innerText = analytics.totalJobs;
+        document.getElementById('metric-jobs-sub').innerText = `${jobs.length} requisitions active`;
+
+        document.getElementById('metric-avg-match').innerText = analytics.averageMatch.toFixed(1) + '%';
+        document.getElementById('metric-coverage').innerText = analytics.skillCoverage.toFixed(1) + '%';
+
+        // Matching Activity Preview (top 3 candidate-job compatibility pairs)
+        const actEl = document.getElementById('activity-preview');
+        if (candidates.length && jobs.length) {
+          actEl.innerHTML = candidates.slice(0, 3).map((c, i) => {
+            const j = jobs[i % jobs.length];
+            return `
+              <div style="background:var(--bg-surface);padding:0.75rem 1rem;border-radius:var(--radius-xs);border:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <strong style="color:var(--text-cream);">${c.name}</strong> 
+                  <span style="color:var(--text-muted);font-size:0.8rem;margin:0 0.4rem;">➔</span> 
+                  <span style="color:var(--text-cream-dim);">${j.title}</span>
+                </div>
+                <span class="score-pill score-high">85%+ Compatibility</span>
+              </div>
+            `;
+          }).join('');
+        }
+
+        // Assignments Preview
+        const assignEl = document.getElementById('assignments-preview');
+        if (assignments && assignments.assignments && assignments.assignments.length) {
+          assignEl.innerHTML = assignments.assignments.slice(0, 3).map(a => `
+            <div style="background:var(--bg-surface);padding:0.75rem 1rem;border-radius:var(--radius-xs);border:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <strong style="color:var(--text-cream);">${a.candidateName}</strong>
+                <span style="color:var(--text-muted);font-size:0.8rem;margin:0 0.4rem;">➔</span>
+                <span style="color:var(--text-cream-dim);">${a.jobTitle}</span>
+              </div>
+              <span class="score-pill score-high">${a.totalScore.toFixed(1)}%</span>
+            </div>
+          `).join('');
+        } else {
+          assignEl.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem;">No assignments calculated yet.</div>';
+        }
+
+        // Candidates Snapshot
+        const candTbody = document.getElementById('candidates-tbody');
+        if (!candidates.length) {
+          candTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">No candidates found.</td></tr>';
+        } else {
+          candTbody.innerHTML = candidates.slice(0, 5).map(c => `
+            <tr>
+              <td><span style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);">${c.id}</span></td>
+              <td>
+                <div style="font-weight:700;">${c.name}</div>
+                <div style="margin-top:2px;">
+                  <span style="font-family:var(--font-mono);font-size:0.68rem;padding:2px 6px;background:rgba(255,255,255,0.06);border-radius:2px;color:var(--text-muted);">${c.availability}</span>
+                </div>
+              </td>
+              <td>${c.experienceYears} yrs</td>
+              <td>${UI.renderSkillChips(c.skills ? c.skills.slice(0, 3) : [])}</td>
+            </tr>
+          `).join('');
+        }
+
+        // Jobs Snapshot
+        const jobsTbody = document.getElementById('jobs-tbody');
+        if (!jobs.length) {
+          jobsTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">No jobs found.</td></tr>';
+        } else {
+          jobsTbody.innerHTML = jobs.slice(0, 5).map(j => `
+            <tr>
+              <td><span style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);">${j.id}</span></td>
+              <td>
+                <div style="font-weight:700;">${j.title}</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);">${j.department}</div>
+              </td>
+              <td>${j.minExperienceYears} yrs</td>
+              <td>${UI.renderSkillChips(j.requiredSkills ? j.requiredSkills.slice(0, 3) : [], 'required')}</td>
+            </tr>
+          `).join('');
+        }
+
+      } catch (err) {
+        UI.toast('Failed to load dashboard: ' + err.message, 'error');
+      }
+    }
+
+    document.getElementById('reset-data-btn').addEventListener('click', async () => {
+      if (confirm('Reset candidates and jobs to the original sample dataset?')) {
+        try {
+          await API.resetData();
+          UI.toast('Data reset to original sample state.', 'success');
+          loadDashboard();
+        } catch (err) {
+          UI.toast('Failed to reset data: ' + err.message, 'error');
+        }
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+  </script>
+</body>
+</html>

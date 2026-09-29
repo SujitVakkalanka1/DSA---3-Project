@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill Intelligence | Talent Engine</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page-frame">
+
+    <!-- Minimalist Navbar -->
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a href="/" class="nav-brand">
+          <div class="brand-dot"></div>
+          <span>TALENT ENGINE</span>
+        </a>
+
+        <button class="nav-mobile-toggle" aria-label="Toggle navigation">MENU ☰</button>
+
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/candidates" class="nav-link active">Candidates</a></li>
+          <li><a href="/jobs" class="nav-link">Jobs</a></li>
+          <li><a href="/match" class="nav-link">Matching</a></li>
+          <li><a href="/assignments" class="nav-link">Assignments</a></li>
+          <li><a href="/team-optimizer" class="nav-link">Team Optimizer</a></li>
+          <li><a href="/analytics" class="nav-link">Analytics</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Candidate</button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Skill Intelligence</h1>
+          <p class="page-subtitle">Candidate profiles, raw entered terms vs normalized canonical skills, experience, and top matches.</p>
+        </div>
+        <div style="display: flex; gap: 0.6rem;">
+          <input type="file" id="csv-upload" accept=".csv" style="display:none;" onchange="handleCSVUpload(event)">
+          <button class="btn btn-outline btn-sm" onclick="document.getElementById('csv-upload').click()">📁 Import CSV</button>
+          <button id="reset-btn" class="btn btn-outline btn-sm">↺ Reset Sample Data</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add Candidate</button>
+        </div>
+      </div>
+
+      <!-- String Search & Filter Toolbar -->
+      <div class="card" style="padding: 1.15rem 1.25rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+          <div style="flex: 1; min-width: 260px;">
+            <input type="text" id="search-input" class="form-input" placeholder="Search candidates by name or skill (e.g. Java, Python, SQL)...">
+          </div>
+          <div style="display: flex; gap: 0.6rem; align-items: center;">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">SOURCE:</span>
+            <select id="filter-source" class="form-select" style="width: auto; padding: 0.45rem 0.75rem;">
+              <option value="ALL">All Candidates</option>
+              <option value="SAMPLE">Sample Candidates</option>
+              <option value="CUSTOM">Custom Candidates</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- String Algorithm Deep Search Inspector (Module 2 KMP / Rabin-Karp) -->
+        <div style="margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--border-subtle); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+          <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">
+            <span style="color:var(--signal-lime);">KMP String Matcher:</span> Search exact skill phrases inside applicant records
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="kmp-query" class="form-input" style="padding:0.35rem 0.65rem; font-size:0.8rem; width:160px;" placeholder="Phrase (e.g. Java)">
+            <button id="kmp-btn" class="btn btn-outline btn-sm">KMP Trace →</button>
+          </div>
+        </div>
+        <div id="kmp-trace-box" style="display:none; margin-top:0.75rem; background:var(--bg-surface); padding:0.75rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle); font-family:var(--font-mono); font-size:0.76rem;"></div>
+      </div>
+
+      <!-- Clean Candidates Directory Table -->
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 70px;">ID</th>
+              <th style="width: 170px;">Candidate</th>
+              <th style="width: 80px;">Exp</th>
+              <th style="width: 100px;">Availability</th>
+              <th>Normalized Skills</th>
+              <th>Original Terms</th>
+              <th style="width: 100px; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="candidates-table-body">
+            <tr><td colspan="7" style="text-align:center; padding: 2rem; color:var(--text-muted);">Loading candidates...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+
+    <!-- Add Candidate Modal -->
+    <div id="add-candidate-modal" class="modal-overlay">
+      <div class="modal-box">
+        <div class="modal-head">
+          <h3>Add Candidate Profile</h3>
+          <button class="modal-close" onclick="UI.closeModal('add-candidate-modal')">&times;</button>
+        </div>
+        <form id="add-candidate-form">
+          <div class="form-group">
+            <label class="form-label" for="add-name">Full Name</label>
+            <input type="text" id="add-name" class="form-input" required placeholder="e.g. Rohan Verma">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="add-skills">Raw Technical Skills (Comma-separated)</label>
+            <input type="text" id="add-skills" class="form-input" required placeholder="e.g. Java, Javascrpt, SQL, Git">
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;">
+              Levenshtein &amp; Damerau Dynamic Programming automatically resolves spelling typos.
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="add-exp">Experience (Years)</label>
+              <input type="number" id="add-exp" class="form-input" min="0" max="40" value="2" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="add-avail">Availability</label>
+              <select id="add-avail" class="form-select">
+                <option value="Immediate">Immediate</option>
+                <option value="15 Days">15 Days</option>
+                <option value="30 Days">30 Days</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1.25rem;">
+            <button type="button" class="btn btn-outline" onclick="UI.closeModal('add-candidate-modal')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Profile →</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit Candidate Modal -->
+    <div id="edit-candidate-modal" class="modal-overlay">
+      <div class="modal-box">
+        <div class="modal-head">
+          <h3>Edit Candidate Profile</h3>
+          <button class="modal-close" onclick="UI.closeModal('edit-candidate-modal')">&times;</button>
+        </div>
+        <form id="edit-candidate-form">
+          <input type="hidden" id="edit-id">
+          <div class="form-group">
+            <label class="form-label" for="edit-name">Full Name</label>
+            <input type="text" id="edit-name" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-skills">Raw Technical Skills (Comma-separated)</label>
+            <input type="text" id="edit-skills" class="form-input" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="edit-exp">Experience (Years)</label>
+              <input type="number" id="edit-exp" class="form-input" min="0" max="40" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="edit-avail">Availability</label>
+              <select id="edit-avail" class="form-select">
+                <option value="Immediate">Immediate</option>
+                <option value="15 Days">15 Days</option>
+                <option value="30 Days">30 Days</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1.25rem;">
+            <button type="button" class="btn btn-outline" onclick="UI.closeModal('edit-candidate-modal')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update Profile →</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Minimalist Footer -->
+    <footer class="footer">
+      <div class="container footer-content">
+        <div class="footer-left">
+          <div class="footer-brand">
+            <div class="brand-dot"></div>
+            <span>TALENT ENGINE</span>
+          </div>
+          <p style="color:var(--text-muted);font-size:0.82rem;max-width:400px;margin-top:0.3rem;">
+            A deterministic candidate-to-role matching and talent-marketplace engine built with pure Java Standard Library.
+          </p>
+        </div>
+
+        <ul class="footer-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/candidates">Candidates</a></li>
+          <li><a href="/jobs">Jobs</a></li>
+          <li><a href="/match">Matching</a></li>
+          <li><a href="/assignments">Assignments</a></li>
+          <li><a href="/team-optimizer">Team Optimizer</a></li>
+          <li><a href="/analytics">Analytics</a></li>
+          <li><a href="/architecture">Technical Details</a></li>
+        </ul>
+      </div>
+
+      <div class="container footer-academic">
+        <div>
+          <span>Data Structures &amp; Algorithms - 3 (25CS2103E)</span> &bull;
+          <span>Team 14 &bull; Section 10</span> &bull;
+          <span>KL University, Hyderabad</span>
+        </div>
+        <div>
+          <span>Pure Java SE 17 &bull; Zero External Frameworks</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    let allCandidates = [];
+
+    async function loadCandidates() {
+      try {
+        allCandidates = await API.getCandidates();
+        renderCandidatesTable();
+      } catch (err) {
+        UI.toast('Failed to load candidates: ' + err.message, 'error');
+      }
+    }
+
+    function renderCandidatesTable() {
+      const q = document.getElementById('search-input').value.toLowerCase().trim();
+      const src = document.getElementById('filter-source').value;
+      const tbody = document.getElementById('candidates-table-body');
+
+      let filtered = allCandidates.filter(c => {
+        if (src === 'SAMPLE' && !c.isSample) return false;
+        if (src === 'CUSTOM' && c.isSample) return false;
+
+        if (q) {
+          const nameMatch = c.name.toLowerCase().includes(q);
+          const skillMatch = c.skills && c.skills.some(s => s.toLowerCase().includes(q));
+          const rawMatch = c.rawSkills && c.rawSkills.some(s => s.toLowerCase().includes(q));
+          if (!nameMatch && !skillMatch && !rawMatch) return false;
+        }
+        return true;
+      });
+
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">No candidates matching filter.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(c => `
+        <tr>
+          <td><span style="font-family:var(--font-mono);font-size:0.76rem;color:var(--text-muted);">${c.id}</span></td>
+          <td>
+            <div style="font-weight:700;color:var(--text-cream);">${c.name}</div>
+            <div style="margin-top:2px;">
+              <span style="font-family:var(--font-mono);font-size:0.68rem;padding:2px 6px;background:rgba(255,255,255,0.06);border-radius:2px;color:var(--text-muted);">${c.isSample ? 'Sample' : 'Custom'}</span>
+            </div>
+          </td>
+          <td>${c.experienceYears} yrs</td>
+          <td><span style="font-family:var(--font-mono);font-size:0.75rem;color:var(--signal-lime);">${c.availability}</span></td>
+          <td>${UI.renderSkillChips(c.skills || [], 'normalized')}</td>
+          <td>${UI.renderSkillChips(c.rawSkills || [], 'raw')}</td>
+          <td style="text-align:right;">
+            <button class="btn btn-outline btn-sm" onclick="openEditModal('${c.id}')" style="padding:2px 7px;font-size:0.74rem;">Edit</button>
+            <button class="btn btn-outline btn-sm" onclick="deleteCandidate('${c.id}', '${c.name.replace(/'/g, "\\'")}')" style="padding:2px 7px;font-size:0.74rem;color:var(--alert-red-light);border-color:rgba(239,68,68,0.3);">Del</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // KMP Search Inspector
+    document.getElementById('kmp-btn').addEventListener('click', async () => {
+      const query = document.getElementById('kmp-query').value.trim();
+      const box = document.getElementById('kmp-trace-box');
+      if (!query) {
+        box.style.display = 'none';
+        return;
+      }
+
+      // Aggregate all candidate raw skill text
+      const corpus = allCandidates.map(c => c.name + ": " + (c.rawSkills || []).join(', ')).join(' | ');
+      try {
+        const res = await API.searchString(corpus, query);
+        box.style.display = 'block';
+        box.innerHTML = `
+          <div style="color:var(--signal-lime);font-weight:700;margin-bottom:4px;">KMP Substring Pattern Search: "${res.pattern}"</div>
+          <div style="color:var(--text-cream-dim);">Matches found: <strong style="color:var(--text-cream);">${res.kmp.matchIndices.length}</strong> | Character comparisons: <strong>${res.kmp.comparisons}</strong> (O(N+M) bound)</div>
+          <div style="color:var(--text-muted);font-size:0.72rem;margin-top:3px;">Prefix Function &pi;-Table: [${res.kmp.piTable.join(', ')}] | Rabin-Karp Hash: ${res.rabinKarp.patternHash}</div>
+        `;
+      } catch (err) {
+        box.style.display = 'block';
+        box.innerHTML = `<span style="color:var(--alert-red-light);">Error executing string search.</span>`;
+      }
+    });
+
+    document.getElementById('search-input').addEventListener('input', renderCandidatesTable);
+    document.getElementById('filter-source').addEventListener('change', renderCandidatesTable);
+
+    function openAddModal() {
+      document.getElementById('add-candidate-form').reset();
+      UI.openModal('add-candidate-modal');
+    }
+
+    function openEditModal(id) {
+      const c = allCandidates.find(item => item.id === id);
+      if (!c) return;
+      document.getElementById('edit-id').value = c.id;
+      document.getElementById('edit-name').value = c.name;
+      document.getElementById('edit-skills').value = (c.rawSkills || []).join(', ');
+      document.getElementById('edit-exp').value = c.experienceYears;
+      document.getElementById('edit-avail').value = c.availability || 'Immediate';
+      UI.openModal('edit-candidate-modal');
+    }
+
+    async function deleteCandidate(id, name) {
+      if (confirm(`Are you sure you want to delete candidate "${name}"?`)) {
+        try {
+          await API.deleteCandidate(id);
+          UI.toast(`Candidate "${name}" deleted.`, 'success');
+          loadCandidates();
+        } catch (err) {
+          UI.toast('Failed to delete: ' + err.message, 'error');
+        }
+      }
+    }
+
+    document.getElementById('add-candidate-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const rawSkillsStr = document.getElementById('add-skills').value;
+      const rawSkills = rawSkillsStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+      const data = {
+        name: document.getElementById('add-name').value.trim(),
+        rawSkills: rawSkills,
+        experienceYears: parseInt(document.getElementById('add-exp').value) || 0,
+        availability: document.getElementById('add-avail').value
+      };
+
+      try {
+        await API.addCandidate(data);
+        UI.closeModal('add-candidate-modal');
+        UI.toast('Candidate created successfully with normalized skills.', 'success');
+        loadCandidates();
+      } catch (err) {
+        UI.toast('Error creating candidate: ' + err.message, 'error');
+      }
+    });
+
+    document.getElementById('edit-candidate-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const rawSkillsStr = document.getElementById('edit-skills').value;
+      const rawSkills = rawSkillsStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
+
+      const data = {
+        id: document.getElementById('edit-id').value,
+        name: document.getElementById('edit-name').value.trim(),
+        rawSkills: rawSkills,
+        experienceYears: parseInt(document.getElementById('edit-exp').value) || 0,
+        availability: document.getElementById('edit-avail').value
+      };
+
+      try {
+        await API.updateCandidate(data);
+        UI.closeModal('edit-candidate-modal');
+        UI.toast('Candidate profile updated.', 'success');
+        loadCandidates();
+      } catch (err) {
+        UI.toast('Error updating candidate: ' + err.message, 'error');
+      }
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', async () => {
+      if (confirm('Reset candidates and jobs to initial sample state?')) {
+        try {
+          await API.resetData();
+          UI.toast('Data reset to sample state.', 'success');
+          loadCandidates();
+        } catch (err) {
+          UI.toast('Error resetting: ' + err.message, 'error');
+        }
+      }
+    });
+
+    async function handleCSVUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const text = e.target.result;
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        if (lines.length <= 1) {
+          UI.toast('CSV is empty or only has headers.', 'error');
+          return;
+        }
+        
+        let successCount = 0;
+        let errorCount = 0;
+
+        // Custom parser to handle quotes
+        function parseLine(line) {
+          const result = [];
+          let current = '';
+          let inQuotes = false;
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              result.push(current);
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          result.push(current);
+          return result;
+        }
+
+        // Expected order: id, name, experienceYears, availability, skills
+        for (let i = 1; i < lines.length; i++) {
+          const columns = parseLine(lines[i]);
+          if (columns.length < 5) continue;
+          
+          const rawSkillsStr = columns[4].replace(/"/g, '');
+          const rawSkills = rawSkillsStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
+          
+          const data = {
+            name: columns[1].trim(),
+            experienceYears: parseInt(columns[2]) || 0,
+            availability: columns[3].trim(),
+            rawSkills: rawSkills
+          };
+          
+          try {
+            await API.addCandidate(data);
+            successCount++;
+          } catch(err) {
+            console.error(err);
+            errorCount++;
+          }
+        }
+        
+        UI.toast(`Imported ${successCount} candidates. ${errorCount} errors.`, 'success');
+        loadCandidates();
+      };
+      reader.readAsText(file);
+      
+      // Reset input so the same file can be uploaded again if needed
+      event.target.value = '';
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCandidates);
+  </script>
+</body>
+</html>

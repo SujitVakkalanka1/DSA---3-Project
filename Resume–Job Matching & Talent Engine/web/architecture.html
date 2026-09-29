@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Architecture &amp; Technical Details | Talent Engine</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page-frame">
+
+    <!-- Minimalist Navbar -->
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a href="/" class="nav-brand">
+          <div class="brand-dot"></div>
+          <span>TALENT ENGINE</span>
+        </a>
+
+        <button class="nav-mobile-toggle" aria-label="Toggle navigation">MENU ☰</button>
+
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/candidates" class="nav-link">Candidates</a></li>
+          <li><a href="/jobs" class="nav-link">Jobs</a></li>
+          <li><a href="/match" class="nav-link">Matching</a></li>
+          <li><a href="/assignments" class="nav-link">Assignments</a></li>
+          <li><a href="/team-optimizer" class="nav-link">Team Optimizer</a></li>
+          <li><a href="/analytics" class="nav-link">Analytics</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <a href="/match" class="nav-cta-btn">
+            <span>Run a Match</span>
+            <span class="cta-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">System Architecture &amp; Technical Details</h1>
+          <p class="page-subtitle">
+            Comprehensive documentation of classical data structures, algorithms, mathematical formulations, and 6-module syllabus coverage.
+          </p>
+        </div>
+        <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--signal-lime);background:var(--signal-lime-bg);padding:4px 10px;border-radius:var(--radius-xs);border:1px solid var(--signal-lime-border);">
+          Pure Java SE 17 Standard Library &bull; Zero External Frameworks
+        </div>
+      </div>
+
+      <!-- MODULE 1: SYSTEM EXECUTION PIPELINE & ALGORITHMIC PROBLEM DECOMPOSITION -->
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <span class="skill-badge" style="color:var(--signal-lime);border-color:var(--signal-lime-border);">Module 1: TextHack &amp; Algorithmic Problem Solving</span>
+            <h2 class="card-title" style="margin-top:0.35rem;">End-to-End System Pipeline &amp; Algorithmic Problem Decomposition</h2>
+            <p class="card-desc">
+              Demonstrating how different algorithmic paradigms are deliberately selected to solve distinct problem types across the complete pipeline.
+            </p>
+          </div>
+        </div>
+
+        <div class="pipeline-grid" style="margin-bottom:1.5rem;">
+          <div class="pipeline-step">
+            <div>
+              <div class="pipeline-step-num">STAGE 01</div>
+              <div class="pipeline-step-name">Input Ingestion</div>
+            </div>
+            <div class="pipeline-step-algo">Candidate.java &bull; Job.java<br>Structured OOP Model</div>
+          </div>
+
+          <div class="pipeline-step">
+            <div>
+              <div class="pipeline-step-num">STAGE 02</div>
+              <div class="pipeline-step-name">String Processing</div>
+            </div>
+            <div class="pipeline-step-algo">StringAlgorithms.java<br>KMP &amp; Rabin-Karp</div>
+          </div>
+
+          <div class="pipeline-step">
+            <div>
+              <div class="pipeline-step-num">STAGE 03</div>
+              <div class="pipeline-step-name">Skill Normalization</div>
+            </div>
+            <div class="pipeline-step-algo">LevenshteinDistance.java<br>Damerau 2D DP Table</div>
+          </div>
+
+          <div class="pipeline-step">
+            <div>
+              <div class="pipeline-step-num">STAGE 04</div>
+              <div class="pipeline-step-name">Inverted Indexing</div>
+            </div>
+            <div class="pipeline-step-algo">SkillIndexer.java<br>HashMap O(1) Avg Lookup</div>
+          </div>
+
+          <div class="pipeline-step">
+            <div>
+              <div class="pipeline-step-num">STAGE 05</div>
+              <div class="pipeline-step-name">Similarity Scoring</div>
+            </div>
+            <div class="pipeline-step-algo">WeightedMatcher.java<br>80% Skill / 20% Exp</div>
+          </div>
+
+          <div class="pipeline-step">
+            <div>
+              <div class="pipeline-step-num">STAGE 06</div>
+              <div class="pipeline-step-name">Optimal Allocation</div>
+            </div>
+            <div class="pipeline-step-algo">Hungarian &amp; Max-Flow<br>Kuhn-Munkres O(N³)</div>
+          </div>
+
+          <div class="pipeline-step">
+            <div>
+              <div class="pipeline-step-num">STAGE 07</div>
+              <div class="pipeline-step-name">Team Staffing</div>
+            </div>
+            <div class="pipeline-step-algo">Bitmask DP &amp; Set Cover<br>Exact vs Harmonic Approx</div>
+          </div>
+
+          <div class="pipeline-step">
+            <div>
+              <div class="pipeline-step-num">STAGE 08</div>
+              <div class="pipeline-step-name">Talent Analytics</div>
+            </div>
+            <div class="pipeline-step-algo">ParallelAnalytics.java<br>Multi-Core Streams</div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-surface); padding:1.25rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle); font-size:0.86rem; color:var(--text-cream-dim); line-height:1.6;">
+          <strong style="color:var(--text-cream);">Algorithmic Selection Rationale:</strong>
+          A naive engineering approach would attempt a brute-force scan or monolithic scoring function for all operations. 
+          Talent Engine demonstrates rigorous problem decomposition:
+          <ul style="margin-left: 1.25rem; margin-top: 0.5rem;">
+            <li><strong>String Search</strong> requires avoiding redundant re-comparisons, which is solved by <strong>KMP prefix function $\pi$</strong> and <strong>Rabin-Karp $O(1)$ rolling hash</strong>.</li>
+            <li><strong>Typo Tolerance</strong> cannot use naive equality; it requires optimal substructure via <strong>Levenshtein &amp; Damerau Dynamic Programming</strong>.</li>
+            <li><strong>Rapid Talent Search</strong> demands avoiding $O(N)$ linear scans, achieved through an inverted index in <strong>$O(1)$ average time via HashMap buckets</strong>.</li>
+            <li><strong>Bijective Marketplace Assignment</strong> cannot be greedily solved without causing sub-optimal allocations; it is solved via the <strong>Hungarian Algorithm (Kuhn-Munkres) in $O(N^3)$</strong>.</li>
+            <li><strong>Multi-Seat Quota Allocation</strong> is framed as a <strong>Network Flow Problem</strong>, where <strong>Edmonds-Karp Max-Flow</strong> and <strong>Min-Cut</strong> identify hiring capacity bottlenecks.</li>
+            <li><strong>Minimum Team Staffing</strong> is recognized as NP-Hard; solved via <strong>Exact Bitmask DP</strong> for small $K$, and <strong>Greedy Set Cover</strong> logarithmic approximation for general universes.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- COMPLETE 6-MODULE DSA-3 COVERAGE MATRIX TABLE -->
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <span class="skill-badge" style="color:var(--signal-lime);border-color:var(--signal-lime-border);">Syllabus Verification</span>
+            <h2 class="card-title" style="margin-top:0.35rem;">DSA-3 Complete 6-Module Coverage Matrix</h2>
+            <p class="card-desc">Formal syllabus mapping detailing theoretical concepts, concrete project integrations, implementation files, and complexity bounds.</p>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 140px;">Module</th>
+                <th style="width: 180px;">Syllabus Topics</th>
+                <th style="width: 220px;">Project Integration</th>
+                <th>Java Implementation</th>
+                <th style="width: 150px;">Complexities</th>
+                <th style="width: 140px;">UI Surface</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:var(--signal-lime);">Module 1</strong><br><span style="font-size:0.72rem;color:var(--text-muted);">TextHack / Decomposition</span></td>
+                <td>System pipeline, problem abstraction, algorithm selection</td>
+                <td>End-to-end data transformation pipeline across 8 stages</td>
+                <td><code>src/storage/DataStore.java</code><br><code>src/model/*</code></td>
+                <td>Time: $O(N)$ pipeline<br>Space: $O(N + M)$</td>
+                <td>Architecture Pipeline Inspector</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--signal-lime);">Module 2</strong><br><span style="font-size:0.72rem;color:var(--text-muted);">String Algorithms</span></td>
+                <td>KMP, Rabin-Karp, Z-algorithm, Suffix Arrays, Kasai's LCP</td>
+                <td>Deep skill phrase search in résumés and job descriptions</td>
+                <td><code>src/dsa/StringAlgorithms.java</code></td>
+                <td>KMP: $O(N + M)$<br>Rabin-Karp: $O(N + M)$ avg<br>Kasai LCP: $O(N)$</td>
+                <td>Candidates &amp; Match phrase search inspector</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--signal-lime);">Module 3</strong><br><span style="font-size:0.72rem;color:var(--text-muted);">Advanced DP</span></td>
+                <td>Levenshtein, Damerau-Levenshtein, Bitmask DP</td>
+                <td>Typo correction &amp; exact small-universe team optimization</td>
+                <td><code>src/dsa/LevenshteinDistance.java</code><br><code>src/dsa/BitmaskTeamOptimizer.java</code></td>
+                <td>Edit Dist: $O(M \times N)$<br>Bitmask DP: $O(2^K \cdot N)$</td>
+                <td>Live Normalizer &amp; Team Optimizer exact mode</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--signal-lime);">Module 4</strong><br><span style="font-size:0.72rem;color:var(--text-muted);">Network Flow &amp; Matching</span></td>
+                <td>Edmonds-Karp, Ford-Fulkerson, Max Bipartite Flow, Min-Cut, Hungarian</td>
+                <td>Weighted 1:1 optimal assignment (Hungarian) and capacity-constrained quota matching (Network Flow)</td>
+                <td><code>src/dsa/HungarianAlgorithm.java</code><br><code>src/dsa/NetworkFlowEngine.java</code></td>
+                <td>Hungarian: $O(N^3)$<br>Edmonds-Karp: $O(V \cdot E^2)$<br>Space: $O(V^2)$</td>
+                <td>Assignments page 1:1 vs Max-Flow quota toggle</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--signal-lime);">Module 5</strong><br><span style="font-size:0.72rem;color:var(--text-muted);">NP-Completeness &amp; Approx</span></td>
+                <td>Set Cover, Greedy Approximation, Harmonic Bound $H(|U|)$</td>
+                <td>Staffing minimal candidate workforce covering required project skills</td>
+                <td><code>src/dsa/GreedySetCover.java</code></td>
+                <td>Time: $O(|U| \cdot N)$<br>Ratio: $H(|U|) \le \ln|U| + 1$</td>
+                <td>Team Optimizer step-by-step trace</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--signal-lime);">Module 6</strong><br><span style="font-size:0.72rem;color:var(--text-muted);">Randomized &amp; Parallel</span></td>
+                <td>Randomized QuickSort, Universal Hashing, Java Parallel Streams</td>
+                <td>Adversarial-resistant match ranking and multi-threaded talent analytics</td>
+                <td><code>src/dsa/RandomizedAlgorithms.java</code><br><code>src/dsa/ParallelAnalytics.java</code></td>
+                <td>QuickSort Exp: $O(N \log N)$<br>Worst: $O(N^2)$<br>Parallel: Workload/CPU dependent</td>
+                <td>Analytics Multi-Core Benchmark meter</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- DETAILED 6-MODULE TECHNICAL VIVA DEEP DIVE -->
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <span class="skill-badge" style="color:var(--signal-lime);border-color:var(--signal-lime-border);">Viva Defense Guide</span>
+            <h2 class="card-title" style="margin-top:0.35rem;">Frequently Asked Faculty Viva Questions &amp; Proofs</h2>
+            <p class="card-desc">Model technical answers for viva examination at 2nd-year B.Tech DSA level.</p>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:1rem;">
+          
+          <details style="background:var(--bg-surface); padding:1rem 1.25rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle);">
+            <summary style="font-weight:700; color:var(--signal-lime); cursor:pointer; font-size:0.92rem;">
+              Q1: How does KMP achieve O(N + M) time, and how does it differ from Rabin-Karp?
+            </summary>
+            <p style="margin-top:0.6rem; font-size:0.85rem; color:var(--text-cream-dim); line-height:1.6;">
+              <strong>Answer:</strong> The Naive string search takes $O(N \times M)$ because upon a mismatch, the text pointer resets. 
+              <strong>KMP (Knuth-Morris-Pratt)</strong> preprocesses the pattern in $O(M)$ into a prefix function table $\pi[i]$, where $\pi[i]$ is the length of the longest proper prefix of $P[0..i]$ that is also a suffix. 
+              When a mismatch occurs at $P[j]$, instead of resetting, the pattern shifts to index $\pi[j-1]$, guaranteeing that characters in the text are never scanned backwards, achieving strict <strong>$O(N + M)$ deterministic time</strong>.
+              <br><br>
+              In contrast, <strong>Rabin-Karp</strong> computes a polynomial rolling hash:
+              $$\text{hash}(S) = \sum_{i=0}^{m-1} S[i] \cdot B^{m-1-i} \pmod M$$
+              Updating the rolling hash for the next window takes $O(1)$ arithmetic time. Rabin-Karp runs in $O(N + M)$ average time but can degrade to $O(N \cdot M)$ on hash collisions, which is mitigated using a large prime modulus ($10^9 + 7$).
+            </p>
+          </details>
+
+          <details style="background:var(--bg-surface); padding:1rem 1.25rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle);">
+            <summary style="font-weight:700; color:var(--signal-lime); cursor:pointer; font-size:0.92rem;">
+              Q2: What is the recurrence relation for Levenshtein and Damerau-Levenshtein Distance?
+            </summary>
+            <p style="margin-top:0.6rem; font-size:0.85rem; color:var(--text-cream-dim); line-height:1.6;">
+              <strong>Answer:</strong> For two strings $s_1$ and $s_2$ of lengths $m$ and $n$, $dp[i][j]$ stores the minimum edit operations to transform $s_1[0..i-1]$ to $s_2[0..j-1]$:
+              $$dp[i][j] = \min \begin{cases} 
+              dp[i-1][j] + 1 & \text{(Deletion)} \\ 
+              dp[i][j-1] + 1 & \text{(Insertion)} \\ 
+              dp[i-1][j-1] + (s_1[i-1] == s_2[j-1] ? 0 : 1) & \text{(Substitution)} 
+              \end{cases}$$
+              In <strong>Damerau-Levenshtein</strong>, adjacent character transposition is supported:
+              $$\text{If } i > 1, j > 1 \text{ and } s_1[i-1] == s_2[j-2] \text{ and } s_1[i-2] == s_2[j-1]:$$
+              $$dp[i][j] = \min(dp[i][j], dp[i-2][j-2] + 1)$$
+              This allows fixing single-step typing errors like "teh" $\to$ "the" or "jsavscript" $\to$ "javascript" with an edit distance of 1 rather than 2.
+            </p>
+          </details>
+
+          <details style="background:var(--bg-surface); padding:1rem 1.25rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle);">
+            <summary style="font-weight:700; color:var(--signal-lime); cursor:pointer; font-size:0.92rem;">
+              Q3: What is the fundamental difference between the Hungarian Algorithm and Network Flow?
+            </summary>
+            <p style="margin-top:0.6rem; font-size:0.85rem; color:var(--text-cream-dim); line-height:1.6;">
+              <strong>Answer:</strong>
+              <ul style="margin-left:1.25rem; margin-top:0.3rem;">
+                <li><strong>Hungarian Algorithm (Kuhn-Munkres):</strong> Solves the <strong>WEIGHTED 1-to-1 Assignment Problem</strong>. Given an $N \times M$ cost matrix ($\text{Cost} = 100 - \text{Score}$), it finds a perfect matching that minimizes total cost in $O(N^3)$ polynomial time. It operates on dual potential variables ($u_i, v_j$) satisfying $u_i + v_j \le c_{ij}$.</li>
+                <li><strong>Network Flow (Edmonds-Karp):</strong> Solves <strong>CAPACITY-CONSTRAINED Feasibility Matching</strong>. Roles can have headcounts $> 1$ (multi-seat openings). Edges exist only if candidates meet a quality threshold. Furthermore, the <strong>Max-Flow Min-Cut Theorem</strong> allows us to identify the hiring bottleneck: the reachable set in the residual graph isolates exactly which roles are starving for talent.</li>
+              </ul>
+              Neither algorithm replaces the other; Hungarian is used for weighted bijective matching, while Network Flow is used for capacity allocation and bottleneck diagnosis.
+            </p>
+          </details>
+
+          <details style="background:var(--bg-surface); padding:1rem 1.25rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle);">
+            <summary style="font-weight:700; color:var(--signal-lime); cursor:pointer; font-size:0.92rem;">
+              Q4: Why is Minimum Set Cover NP-Hard, and why compare Exact Bitmask DP with Greedy Set Cover?
+            </summary>
+            <p style="margin-top:0.6rem; font-size:0.85rem; color:var(--text-cream-dim); line-height:1.6;">
+              <strong>Answer:</strong> Minimum Set Cover is NP-Hard (reduction from Vertex Cover / 3-SAT). No polynomial-time exact algorithm is known unless $P = NP$.
+              <br><br>
+              In Talent Engine, we showcase both approaches:
+              <ul style="margin-left:1.25rem; margin-top:0.3rem;">
+                <li><strong>Exact Bitmask DP (Module 3):</strong> Uses a state $dp[\text{mask}]$ representing the minimum team to cover skill bitmask $\text{mask}$. Running in $O(2^K \cdot N)$ time, it finds the mathematically optimal roster for small instances ($K \le 18$). When $K > 18$, the state space ($2^{18} = 262,144$) explodes exponentially, proving intractability.</li>
+                <li><strong>Greedy Set Cover (Module 5):</strong> Iteratively selects the candidate offering the <strong>maximum marginal skill contribution</strong> to currently uncovered skills. Running in $O(|U| \cdot N)$ polynomial time, it guarantees a logarithmic approximation bound:
+                $$H(|U|) = \sum_{i=1}^{|U|} \frac{1}{i} \le \ln |U| + 1$$
+                We do NOT claim Greedy is always optimal; it is a provably bounded polynomial approximation.</li>
+              </ul>
+            </p>
+          </details>
+
+          <details style="background:var(--bg-surface); padding:1rem 1.25rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle);">
+            <summary style="font-weight:700; color:var(--signal-lime); cursor:pointer; font-size:0.92rem;">
+              Q5: Why choose Randomized QuickSort over Deterministic QuickSort, and what is its complexity?
+            </summary>
+            <p style="margin-top:0.6rem; font-size:0.85rem; color:var(--text-cream-dim); line-height:1.6;">
+              <strong>Answer:</strong> 
+              <br>
+              &bull; <strong>Expected Time Complexity:</strong> $O(N \log N)$
+              <br>
+              &bull; <strong>Worst-Case Time Complexity:</strong> $O(N^2)$
+              <br>
+              &bull; <strong>Auxiliary Space Complexity:</strong> $O(\log N)$ average call stack
+              <br><br>
+              <strong>Rationale:</strong> Deterministic QuickSort (picking first, last, or fixed index) degrades to $O(N^2)$ on already-sorted, reverse-sorted, or structured candidate score lists.
+              By choosing the pivot index uniformly at random ($r \in [\text{low}, \text{high}]$), the probability that an adversary can force unbalanced $1$ vs $N-1$ splits across all partitions is infinitesimally small ($\sim 2^N / N! \to 0$).
+            </p>
+          </details>
+
+          <details style="background:var(--bg-surface); padding:1rem 1.25rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle);">
+            <summary style="font-weight:700; color:var(--signal-lime); cursor:pointer; font-size:0.92rem;">
+              Q6: How are Java Parallel Streams implemented, and what determines their performance?
+            </summary>
+            <p style="margin-top:0.6rem; font-size:0.85rem; color:var(--text-cream-dim); line-height:1.6;">
+              <strong>Answer:</strong> 
+              Java Parallel Streams use the common <code>ForkJoinPool.commonPool()</code>, recursively splitting the dataset using <code>Spliterator</code> work-stealing queues across available hardware threads (<code>Runtime.getRuntime().availableProcessors()</code>).
+              <br><br>
+              Parallel performance is <strong>workload, dataset batch size, and CPU-core dependent</strong>. 
+              For trivial collections ($N < 50$), thread dispatch and join coordination overhead can outweigh computational gains. For large candidate batches or heavy string score computations, multi-core parallelism provides substantial throughput speedups. 
+              Our system includes an empirical live benchmark measuring both sequential and parallel execution times directly on the running JVM.
+            </p>
+          </details>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Minimalist Footer -->
+    <footer class="footer">
+      <div class="container footer-content">
+        <div class="footer-left">
+          <div class="footer-brand">
+            <div class="brand-dot"></div>
+            <span>TALENT ENGINE</span>
+          </div>
+          <p style="color:var(--text-muted);font-size:0.82rem;max-width:400px;margin-top:0.3rem;">
+            A deterministic candidate-to-role matching and talent-marketplace engine built with pure Java Standard Library.
+          </p>
+        </div>
+
+        <ul class="footer-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/candidates">Candidates</a></li>
+          <li><a href="/jobs">Jobs</a></li>
+          <li><a href="/match">Matching</a></li>
+          <li><a href="/assignments">Assignments</a></li>
+          <li><a href="/team-optimizer">Team Optimizer</a></li>
+          <li><a href="/analytics">Analytics</a></li>
+          <li><a href="/architecture">Technical Details</a></li>
+        </ul>
+      </div>
+
+      <div class="container footer-academic">
+        <div>
+          <span>Data Structures &amp; Algorithms - 3 (25CS2103E)</span> &bull;
+          <span>Team 14 &bull; Section 10</span> &bull;
+          <span>KL University, Hyderabad</span>
+        </div>
+        <div>
+          <span>Pure Java SE 17 &bull; Zero External Frameworks</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Optimal Candidate–Role Allocation | Talent Engine</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page-frame">
+
+    <!-- Minimalist Navbar -->
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a href="/" class="nav-brand">
+          <div class="brand-dot"></div>
+          <span>TALENT ENGINE</span>
+        </a>
+
+        <button class="nav-mobile-toggle" aria-label="Toggle navigation">MENU ☰</button>
+
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/candidates" class="nav-link">Candidates</a></li>
+          <li><a href="/jobs" class="nav-link">Jobs</a></li>
+          <li><a href="/match" class="nav-link">Matching</a></li>
+          <li><a href="/assignments" class="nav-link active">Assignments</a></li>
+          <li><a href="/team-optimizer" class="nav-link">Team Optimizer</a></li>
+          <li><a href="/analytics" class="nav-link">Analytics</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <button id="recalculate-btn" class="btn btn-primary btn-sm">Re-calculate Allocation</button>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Optimal Candidate–Role Allocation</h1>
+          <p class="page-subtitle">
+            Marketplace talent allocation solving weighted 1:1 bijection (Hungarian) and capacity-constrained feasibility (Network Flow).
+          </p>
+        </div>
+        <div style="display: flex; gap: 0.6rem;">
+          <button onclick="exportAssignmentReport()" class="btn btn-outline btn-sm">📄 Export Report</button>
+          <button id="refresh-btn" class="btn btn-primary btn-sm">Run Kuhn-Munkres →</button>
+        </div>
+      </div>
+
+      <!-- Stat Strip -->
+      <div class="stat-strip">
+        <div class="stat-box">
+          <div class="stat-label">Roles Filled</div>
+          <div class="stat-val lime" id="summary-roles-filled">--</div>
+          <div class="stat-sub" id="summary-roles-sub">Assigned positions</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">Candidates Allocated</div>
+          <div class="stat-val lime" id="summary-cand-assigned">--</div>
+          <div class="stat-sub" id="summary-cand-sub">Bijective mapping</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">Mean Compatibility</div>
+          <div class="stat-val" id="summary-avg-score">--%</div>
+          <div class="stat-sub">Across all paired assignments</div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">Total Skill Gap Minimized</div>
+          <div class="stat-val" id="summary-skill-gap">--</div>
+          <div class="stat-sub">&Sigma; (100 - Score) cost minimized</div>
+        </div>
+      </div>
+
+      <!-- Algorithm Paradigm Toggle: Hungarian vs Network Flow -->
+      <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem;">
+        <button id="tab-hungarian" class="btn btn-primary btn-sm" onclick="switchAllocationTab('hungarian')">
+          Hungarian Algorithm — Weighted 1:1 Assignment
+        </button>
+        <button id="tab-network-flow" class="btn btn-outline btn-sm" onclick="switchAllocationTab('network-flow')">
+          Module 4 Network Flow (Capacity &amp; Min-Cut)
+        </button>
+      </div>
+
+      <!-- 1. Hungarian Allocation Panel -->
+      <div id="panel-hungarian">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Optimal One-to-One Assignments (Kuhn-Munkres)</h2>
+              <p class="card-desc">Guarantees mathematical global optimum minimizing total skill gap in O(N³) polynomial time.</p>
+            </div>
+            <span class="skill-badge" style="color:var(--signal-lime);border-color:var(--signal-lime-border);">Hungarian Algorithm — Weighted 1:1 Assignment</span>
+          </div>
+
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 170px;">Candidate</th>
+                  <th style="width: 190px;">Assigned Role</th>
+                  <th style="width: 100px;">Score</th>
+                  <th>Skill Overlap</th>
+                  <th>Uncovered Skills</th>
+                  <th style="width: 100px;">Assignment</th>
+                </tr>
+              </thead>
+              <tbody id="assignments-table-body">
+                <tr><td colspan="6" style="text-align:center; padding: 2rem; color:var(--text-muted);">Computing Hungarian assignments...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Assignment Heatmap Matrix -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Assignment Heatmap Matrix</h2>
+              <p class="card-desc">Optimal candidate-job pairs highlighted with Signal Lime border.</p>
+            </div>
+          </div>
+          <div id="heatmap-container" class="table-wrap">
+            <div style="text-align:center; padding:2rem; color:var(--text-muted);">Generating cost matrix...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Network Flow Edmonds-Karp Panel -->
+      <div id="panel-network-flow" style="display: none;">
+        <div class="card" style="border-color: rgba(236, 242, 35, 0.35);">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Capacity-Constrained Matching (Edmonds-Karp Max-Flow)</h2>
+              <p class="card-desc">Evaluates feasible candidate-to-role flow with role headcount capacities and Min-Cut bottleneck analysis.</p>
+            </div>
+            <span class="skill-badge" style="color:var(--signal-lime);border-color:var(--signal-lime-border);">Module 4 Network Flow</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="background:var(--bg-surface); padding:1rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle);">
+              <div class="stat-label">Maximum Flow Pushed</div>
+              <div class="stat-val lime" id="flow-max-val">--</div>
+              <div class="stat-sub">Total candidates matched</div>
+            </div>
+            <div style="background:var(--bg-surface); padding:1rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle);">
+              <div class="stat-label">Total Role Capacity</div>
+              <div class="stat-val" id="flow-capacity-val">--</div>
+              <div class="stat-sub">Available role seats</div>
+            </div>
+            <div style="background:var(--bg-surface); padding:1rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle);">
+              <div class="stat-label">Augmenting Paths (BFS)</div>
+              <div class="stat-val" id="flow-paths-val">--</div>
+              <div class="stat-sub">Edmonds-Karp augmentations</div>
+            </div>
+          </div>
+
+          <!-- Min-Cut Bottlenecks Analysis -->
+          <div style="background: rgba(18, 74, 21, 0.2); padding: 1.25rem; border-radius: var(--radius-xs); border: 1px solid var(--signal-lime-border); margin-bottom: 1.5rem;">
+            <div style="font-weight: 700; color: var(--signal-lime); font-size: 0.95rem; margin-bottom: 0.4rem;">
+              Min-Cut Bottleneck Analysis (Max-Flow Min-Cut Theorem)
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-cream-dim); line-height: 1.5; margin-bottom: 0.75rem;">
+              Identifies the tight capacity cuts in the residual network preventing full role fulfillment.
+            </p>
+            <div id="flow-bottlenecks-list" style="display:flex; flex-direction:column; gap:0.4rem;"></div>
+          </div>
+
+          <!-- Network Flow Matched Pairs Table -->
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Candidate</th>
+                  <th>Allocated Role</th>
+                  <th style="width: 100px;">Match Score</th>
+                  <th style="width: 120px;">Residual Flow</th>
+                  <th style="width: 100px;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="flow-pairs-tbody">
+                <tr><td colspan="5" style="text-align:center; padding: 1.5rem; color:var(--text-muted);">Loading network flow results...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Minimalist Footer -->
+    <footer class="footer">
+      <div class="container footer-content">
+        <div class="footer-left">
+          <div class="footer-brand">
+            <div class="brand-dot"></div>
+            <span>TALENT ENGINE</span>
+          </div>
+          <p style="color:var(--text-muted);font-size:0.82rem;max-width:400px;margin-top:0.3rem;">
+            A deterministic candidate-to-role matching and talent-marketplace engine built with pure Java Standard Library.
+          </p>
+        </div>
+
+        <ul class="footer-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/candidates">Candidates</a></li>
+          <li><a href="/jobs">Jobs</a></li>
+          <li><a href="/match">Matching</a></li>
+          <li><a href="/assignments">Assignments</a></li>
+          <li><a href="/team-optimizer">Team Optimizer</a></li>
+          <li><a href="/analytics">Analytics</a></li>
+          <li><a href="/architecture">Technical Details</a></li>
+        </ul>
+      </div>
+
+      <div class="container footer-academic">
+        <div>
+          <span>Data Structures &amp; Algorithms - 3 (25CS2103E)</span> &bull;
+          <span>Team 14 &bull; Section 10</span> &bull;
+          <span>KL University, Hyderabad</span>
+        </div>
+        <div>
+          <span>Pure Java SE 17 &bull; Zero External Frameworks</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    let assignmentData = null;
+    let networkFlowData = null;
+
+    async function loadAssignments() {
+      try {
+        assignmentData = await API.getAssignments();
+        renderSummary(assignmentData);
+        renderTable(assignmentData);
+        renderHeatmap(assignmentData);
+      } catch (err) {
+        UI.toast('Failed to compute Hungarian assignments: ' + err.message, 'error');
+      }
+    }
+
+    async function loadNetworkFlow() {
+      try {
+        networkFlowData = await API.getNetworkFlow();
+        document.getElementById('flow-max-val').innerText = networkFlowData.maxFlow;
+        document.getElementById('flow-capacity-val').innerText = networkFlowData.totalCapacity;
+        document.getElementById('flow-paths-val').innerText = networkFlowData.augmentingPathsCount;
+
+        // Bottlenecks list
+        const bList = document.getElementById('flow-bottlenecks-list');
+        if (networkFlowData.minCutBottlenecks.length) {
+          bList.innerHTML = networkFlowData.minCutBottlenecks.map(b => `
+            <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-cream);background:rgba(0,0,0,0.4);padding:4px 8px;border-radius:2px;border-left:3px solid var(--signal-lime);">
+              &bull; ${b}
+            </div>
+          `).join('');
+        } else {
+          bList.innerHTML = '<div style="color:var(--accent-green);font-size:0.8rem;">No capacity bottlenecks detected. Flow is unconstrained.</div>';
+        }
+
+        // Matched pairs
+        const pairsTbody = document.getElementById('flow-pairs-tbody');
+        if (networkFlowData.matchedPairs.length) {
+          pairsTbody.innerHTML = networkFlowData.matchedPairs.map(p => `
+            <tr>
+              <td><strong style="color:var(--text-cream);">${p.candidate.name}</strong></td>
+              <td><strong style="color:var(--signal-lime);">${p.job.title}</strong></td>
+              <td><span class="score-pill score-high">${p.matchScore.toFixed(1)}%</span></td>
+              <td style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-dim);">1 / 1 saturated</td>
+              <td><span class="skill-badge matched">Pushed Flow</span></td>
+            </tr>
+          `).join('');
+        } else {
+          pairsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No flow matches meeting threshold.</td></tr>';
+        }
+      } catch (err) {
+        UI.toast('Failed to compute Network Flow: ' + err.message, 'error');
+      }
+    }
+
+    function switchAllocationTab(tab) {
+      const btnH = document.getElementById('tab-hungarian');
+      const btnF = document.getElementById('tab-network-flow');
+      const panelH = document.getElementById('panel-hungarian');
+      const panelF = document.getElementById('panel-network-flow');
+
+      if (tab === 'hungarian') {
+        btnH.className = 'btn btn-primary btn-sm';
+        btnF.className = 'btn btn-outline btn-sm';
+        panelH.style.display = 'block';
+        panelF.style.display = 'none';
+      } else {
+        btnF.className = 'btn btn-primary btn-sm';
+        btnH.className = 'btn btn-outline btn-sm';
+        panelH.style.display = 'none';
+        panelF.style.display = 'block';
+        if (!networkFlowData) loadNetworkFlow();
+      }
+    }
+
+    function renderSummary(data) {
+      document.getElementById('summary-roles-filled').innerText = data.assignments.length;
+      document.getElementById('summary-roles-sub').innerText = `Out of ${data.jobTitles.length} total roles`;
+
+      document.getElementById('summary-cand-assigned').innerText = data.assignments.length;
+      document.getElementById('summary-cand-sub').innerText = `Out of ${data.candidateNames.length} applicants`;
+
+      document.getElementById('summary-avg-score').innerText = data.averageScore.toFixed(1) + '%';
+      document.getElementById('summary-skill-gap').innerText = data.totalSkillGap.toFixed(1);
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('assignments-table-body');
+      if (!data.assignments.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted);">No assignments possible.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.assignments.map(a => {
+        const candName = (a.candidate && a.candidate.name) ? a.candidate.name : (a.candidateName || 'Candidate');
+        const roleTitle = (a.job && a.job.title) ? a.job.title : (a.jobTitle || 'Role');
+        const score = a.totalScore !== undefined ? a.totalScore.toFixed(1) : '0.0';
+        const matched = a.matchedSkills || [];
+        const missing = a.missingSkills || [];
+        return `
+        <tr>
+          <td><strong style="color:var(--text-cream);">${candName}</strong></td>
+          <td><strong style="color:var(--signal-lime);">${roleTitle}</strong></td>
+          <td><span class="score-pill score-high">${score}%</span></td>
+          <td>${UI.renderSkillChips(matched, 'matched')}</td>
+          <td>${UI.renderSkillChips(missing, 'missing')}</td>
+          <td><span class="skill-badge matched">Optimal 1:1</span></td>
+        </tr>
+      `;
+      }).join('');
+    }
+
+    function renderHeatmap(data) {
+      const container = document.getElementById('heatmap-container');
+      if (!data.scoreMatrix || !data.scoreMatrix.length) {
+        container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">No matrix data.</div>';
+        return;
+      }
+
+      const assignedPairs = new Set();
+      data.assignments.forEach(a => {
+        const candName = (a.candidate && a.candidate.name) ? a.candidate.name : (a.candidateName || '');
+        const roleTitle = (a.job && a.job.title) ? a.job.title : (a.jobTitle || '');
+        assignedPairs.add(`${candName}:::${roleTitle}`);
+      });
+
+      let html = '<table class="data-table" style="text-align:center;"><thead><tr><th style="text-align:left;">Applicant / Role</th>';
+      data.jobTitles.forEach(t => {
+        html += `<th style="text-align:center;min-width:110px;">${t}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+
+      data.candidateNames.forEach((name, i) => {
+        html += `<tr><td style="text-align:left;font-weight:700;color:var(--text-cream);">${name}</td>`;
+        data.scoreMatrix[i].forEach((score, j) => {
+          const isAssigned = assignedPairs.has(`${name}:::${data.jobTitles[j]}`);
+          let borderStyle = isAssigned ? 'outline: 2px solid var(--signal-lime); background: rgba(236, 242, 35, 0.16);' : '';
+          let textWeight = isAssigned ? 'font-weight:900;color:var(--signal-lime);' : 'color:var(--text-cream-dim);';
+
+          html += `<td style="font-family:var(--font-mono);${borderStyle};${textWeight}">
+            ${score.toFixed(0)}%
+            ${isAssigned ? '<div style="font-size:0.62rem;color:var(--signal-lime);letter-spacing:0.06em;">ASSIGNED</div>' : ''}
+          </td>`;
+        });
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    function exportAssignmentReport() {
+      if (!assignmentData) return;
+      let text = "=================================================================\n";
+      text += "   TALENT ENGINE - OPTIMAL CANDIDATE-ROLE ALLOCATION REPORT\n";
+      text += "   ALGORITHM: KUHN-MUNKRES HUNGARIAN ALGORITHM O(N^3)\n";
+      text += "=================================================================\n\n";
+      text += `Mean Compatibility: ${assignmentData.averageScore.toFixed(1)}%\n`;
+      text += `Total Skill Gap Minimized: ${assignmentData.totalSkillGap.toFixed(1)}\n`;
+      text += `Total Roles Filled: ${assignmentData.assignments.length} / ${assignmentData.jobTitles.length}\n\n`;
+      text += "ASSIGNED PAIRINGS:\n";
+      text += "-----------------------------------------------------------------\n";
+
+      assignmentData.assignments.forEach((a, i) => {
+        const cName = (a.candidate && a.candidate.name) ? a.candidate.name : (a.candidateName || 'Candidate');
+        const jTitle = (a.job && a.job.title) ? a.job.title : (a.jobTitle || 'Role');
+        const score = a.totalScore !== undefined ? a.totalScore.toFixed(1) : '0.0';
+        const matched = a.matchedSkills || [];
+        const missing = a.missingSkills || [];
+        text += `${i + 1}. Candidate: ${cName.padEnd(20)} -> Role: ${jTitle.padEnd(24)} (Score: ${score}%)\n`;
+        text += `   Matched Skills: ${matched.join(', ')}\n`;
+        if (missing.length) text += `   Missing Gaps:   ${missing.join(', ')}\n`;
+        text += "\n";
+      });
+
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `talent_engine_optimal_allocation_${Date.now()}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('refresh-btn').addEventListener('click', loadAssignments);
+    document.getElementById('recalculate-btn').addEventListener('click', loadAssignments);
+    document.addEventListener('DOMContentLoaded', loadAssignments);
+  </script>
+</body>
+</html>

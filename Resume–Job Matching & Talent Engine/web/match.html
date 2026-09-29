@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidate–Role Matching | Talent Engine</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page-frame">
+
+    <!-- Minimalist Navbar -->
+    <nav class="navbar">
+      <div class="nav-inner">
+        <a href="/" class="nav-brand">
+          <div class="brand-dot"></div>
+          <span>TALENT ENGINE</span>
+        </a>
+
+        <button class="nav-mobile-toggle" aria-label="Toggle navigation">MENU ☰</button>
+
+        <ul class="nav-links">
+          <li><a href="/" class="nav-link">Home</a></li>
+          <li><a href="/candidates" class="nav-link">Candidates</a></li>
+          <li><a href="/jobs" class="nav-link">Jobs</a></li>
+          <li><a href="/match" class="nav-link active">Matching</a></li>
+          <li><a href="/assignments" class="nav-link">Assignments</a></li>
+          <li><a href="/team-optimizer" class="nav-link">Team Optimizer</a></li>
+          <li><a href="/analytics" class="nav-link">Analytics</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <a href="/assignments" class="nav-cta-btn">
+            <span>View Assignments</span>
+            <span class="cta-arrow">→</span>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Candidate–Role Matching</h1>
+          <p class="page-subtitle">Deterministic compatibility scoring with auditable skill overlap, experience weighting, and gap analysis.</p>
+        </div>
+      </div>
+
+      <!-- Match Configuration Selector -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Select Job Role</h2>
+            <p class="card-desc">Evaluate the entire candidate pool deterministically against an open requisition.</p>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1.25rem; align-items: flex-end;">
+          <div class="form-group" style="flex: 1; margin-bottom:0;">
+            <label class="form-label" for="select-job">Target Role Requirement</label>
+            <select id="select-job" class="form-select">
+              <option value="">-- Choose an Open Role --</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Eligible Candidates List (Initially hidden) -->
+      <div id="eligible-candidates-section" style="display: none; margin-bottom: 2rem;">
+        <h2 style="font-family: var(--font-mono); color: var(--text-cream); font-size: 1.1rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">Eligible Candidates</h2>
+        <div id="eligible-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Items will be injected here -->
+        </div>
+        
+        <div style="margin-top: 1.25rem;">
+           <button id="toggle-excluded-btn" class="btn btn-outline btn-sm" style="font-size: 0.8rem; border-color: var(--border-subtle); color: var(--text-muted); background: transparent; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;">
+             <span id="excluded-count-text">0 candidates excluded</span> — below eligibility requirements
+           </button>
+           <div id="excluded-list" style="display: none; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; padding: 1rem; border: 1px dashed var(--border-subtle); border-radius: var(--radius-sm); background: rgba(0,0,0,0.2);">
+             <!-- Excluded items -->
+           </div>
+        </div>
+      </div>
+
+      <!-- Match Result Display (Auditable Decision Panel) -->
+      <div id="match-result-card" class="card" style="display: none; border-color: rgba(236, 242, 35, 0.35); background: radial-gradient(circle at 80% 20%, rgba(18, 74, 21, 0.25) 0%, rgba(10, 19, 10, 0.95) 70%);">
+        
+        <div class="card-header" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 1.25rem;">
+          <div>
+            <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--signal-lime); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.3rem;">
+              Decision Audit Trail
+            </div>
+            <h2 class="card-title" id="result-title" style="font-size:1.4rem;">Candidate ➔ Role Fit</h2>
+            <p class="card-desc" id="result-explanation">Score evaluated via HashSet Intersection and Experience Ratio.</p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); text-transform:uppercase;">Compatibility Score</div>
+            <div id="result-total-score" style="font-size: 2.8rem; font-weight: 900; font-family:var(--font-mono); color: var(--signal-lime); line-height: 1;">
+              --%
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Breakdown Blocks -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+          
+          <div style="background:var(--bg-surface); padding:1rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle);">
+            <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); text-transform:uppercase;">Skill Overlap (80% Weight)</div>
+            <div id="result-skill-score" style="font-size:1.5rem; font-weight:800; font-family:var(--font-mono); color:var(--text-cream); margin:0.2rem 0;">-- / 80 pts</div>
+            <div id="result-overlap-ratio" style="font-size:0.78rem; color:var(--text-dim);">-- skills matched</div>
+          </div>
+
+          <div style="background:var(--bg-surface); padding:1rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle);">
+            <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); text-transform:uppercase;">Experience (20% Weight)</div>
+            <div id="result-exp-score" style="font-size:1.5rem; font-weight:800; font-family:var(--font-mono); color:var(--text-cream); margin:0.2rem 0;">-- / 20 pts</div>
+            <div id="result-exp-ratio" style="font-size:0.78rem; color:var(--text-dim);">Candidate vs Required Years</div>
+          </div>
+
+          <div style="background:var(--bg-surface); padding:1rem; border-radius:var(--radius-xs); border:1px solid var(--border-subtle);">
+            <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); text-transform:uppercase;">String &amp; DP Processing</div>
+            <div id="result-dp-info" style="font-size:0.95rem; font-weight:700; color:var(--signal-lime); margin:0.35rem 0;">KMP &bull; Levenshtein Verified</div>
+            <div style="font-size:0.76rem; color:var(--text-dim);">Normalized taxonomy matches</div>
+          </div>
+
+        </div>
+
+        <!-- Matched Skills Chips -->
+        <div style="margin-bottom: 1.25rem;">
+          <div style="font-family:var(--font-mono); font-size:0.76rem; text-transform:uppercase; color:var(--accent-green); margin-bottom:0.4rem;">
+            ✓ Matched Skills Verified
+          </div>
+          <div id="result-matched-chips" style="display:flex; flex-wrap:wrap; gap:0.4rem;"></div>
+        </div>
+
+        <!-- Skill Gaps Chips -->
+        <div>
+          <div style="font-family:var(--font-mono); font-size:0.76rem; text-transform:uppercase; color:var(--alert-red-light); margin-bottom:0.4rem;">
+            ✕ Skill Gaps (Missing Requirements)
+          </div>
+          <div id="result-missing-chips" style="display:flex; flex-wrap:wrap; gap:0.4rem;"></div>
+        </div>
+
+      </div>
+
+      <!-- All-Pairs Compatibility Heatmap Matrix -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">All-Pairs Compatibility Matrix</h2>
+            <p class="card-desc">Complete N &times; M candidate-to-role scoring grid evaluated deterministically.</p>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <button id="refresh-matrix-btn" class="btn btn-outline btn-sm">Refresh Matrix ↺</button>
+          </div>
+        </div>
+
+        <div id="matrix-container" class="table-wrap">
+          <div style="text-align:center; padding:2rem; color:var(--text-muted);">Loading compatibility matrix...</div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Minimalist Footer -->
+    <footer class="footer">
+      <div class="container footer-content">
+        <div class="footer-left">
+          <div class="footer-brand">
+            <div class="brand-dot"></div>
+            <span>TALENT ENGINE</span>
+          </div>
+          <p style="color:var(--text-muted);font-size:0.82rem;max-width:400px;margin-top:0.3rem;">
+            A deterministic candidate-to-role matching and talent-marketplace engine built with pure Java Standard Library.
+          </p>
+        </div>
+
+        <ul class="footer-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/candidates">Candidates</a></li>
+          <li><a href="/jobs">Jobs</a></li>
+          <li><a href="/match">Matching</a></li>
+          <li><a href="/assignments">Assignments</a></li>
+          <li><a href="/team-optimizer">Team Optimizer</a></li>
+          <li><a href="/analytics">Analytics</a></li>
+          <li><a href="/architecture">Technical Details</a></li>
+        </ul>
+      </div>
+
+      <div class="container footer-academic">
+        <div>
+          <span>Data Structures &amp; Algorithms - 3 (25CS2103E)</span> &bull;
+          <span>Team 14 &bull; Section 10</span> &bull;
+          <span>KL University, Hyderabad</span>
+        </div>
+        <div>
+          <span>Pure Java SE 17 &bull; Zero External Frameworks</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <style>
+    .candidate-row:hover {
+      border-color: var(--signal-lime) !important;
+      background: rgba(255, 255, 255, 0.03) !important;
+    }
+  </style>
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    let candidates = [];
+    let jobs = [];
+    let currentMatchResults = {};
+
+    async function init() {
+      try {
+        const [cList, jList] = await Promise.all([
+          API.getCandidates(),
+          API.getJobs()
+        ]);
+        candidates = cList;
+        jobs = jList;
+
+        const jobSelect = document.getElementById('select-job');
+        jobSelect.innerHTML = '<option value="">-- Choose an Open Role --</option>' +
+          jobs.map(j => `<option value="${j.id}">${j.title} (${j.department} &bull; min ${j.minExperienceYears} yrs)</option>`).join('');
+
+        loadMatrix();
+      } catch (err) {
+        UI.toast('Failed to initialize matching view: ' + err.message, 'error');
+      }
+    }
+
+    document.getElementById('select-job').addEventListener('change', async (e) => {
+      const jId = e.target.value;
+      const section = document.getElementById('eligible-candidates-section');
+      const listEl = document.getElementById('eligible-list');
+      const excludedListEl = document.getElementById('excluded-list');
+      const excludedBtn = document.getElementById('toggle-excluded-btn');
+      const resultCard = document.getElementById('match-result-card');
+      
+      resultCard.style.display = 'none';
+
+      if (!jId) {
+        section.style.display = 'none';
+        return;
+      }
+      
+      listEl.innerHTML = '<div style="color:var(--text-muted); padding:1rem; text-align:center;">Evaluating candidate pool...</div>';
+      section.style.display = 'block';
+      excludedListEl.style.display = 'none';
+      excludedBtn.innerHTML = 'Evaluating...';
+      currentMatchResults = {};
+
+      try {
+        // Calculate match for all candidates concurrently
+        const matchPromises = candidates.map(c => API.calculateMatch(c.id, jId));
+        const matchResults = await Promise.all(matchPromises);
+        
+        // Threshold definition based on existing compatibility score logic
+        const ELIGIBILITY_THRESHOLD = 50.0;
+        
+        const eligible = [];
+        const excluded = [];
+        
+        matchResults.forEach((res, i) => {
+          const c = candidates[i];
+          res.candidate = c; // Attach candidate object for rendering
+          currentMatchResults[c.id] = res; // Store for quick access when clicked
+          
+          if (res.totalScore >= ELIGIBILITY_THRESHOLD) {
+            eligible.push(res);
+          } else {
+            excluded.push(res);
+          }
+        });
+        
+        // Sort eligible: highest score first
+        eligible.sort((a, b) => b.totalScore - a.totalScore);
+        
+        renderEligible(eligible, listEl);
+        renderExcluded(excluded, excludedListEl, excludedBtn);
+        
+      } catch (err) {
+        listEl.innerHTML = `<div style="color:var(--alert-red-light); padding:1rem;">Error evaluating candidates: ${err.message}</div>`;
+      }
+    });
+
+    document.getElementById('toggle-excluded-btn').addEventListener('click', () => {
+      const el = document.getElementById('excluded-list');
+      if (el.style.display === 'none') {
+        el.style.display = 'flex';
+      } else {
+        el.style.display = 'none';
+      }
+    });
+
+    window.selectMatchResult = function(candidateId) {
+      const res = currentMatchResults[candidateId];
+      if (res) {
+        displayMatchResult(res);
+      }
+    };
+
+    function renderEligible(eligible, listEl) {
+      if (eligible.length === 0) {
+        listEl.innerHTML = '<div style="color:var(--alert-red-light); padding: 1rem; border: 1px solid rgba(255,100,100,0.2); border-radius: 4px; background: rgba(255,0,0,0.05);">No candidates met the minimum eligibility requirements for this role.</div>';
+        return;
+      }
+      
+      listEl.innerHTML = eligible.map(res => {
+        const isStrong = res.totalScore >= 80;
+        const matchLabel = isStrong ? 'Strong Match' : 'Medium Match';
+        const labelColor = isStrong ? 'var(--signal-lime)' : 'var(--text-cream)';
+        const c = res.candidate;
+        
+        return `
+          <div class="candidate-row" onclick="selectMatchResult('${c.id}')" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 1.25rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s ease;">
+            <div>
+              <div style="font-family: var(--font-mono); font-size: 0.75rem; color: ${labelColor}; text-transform: uppercase; margin-bottom: 0.4rem; font-weight: 700; letter-spacing: 0.05em;">${matchLabel}</div>
+              <div style="font-size: 1.2rem; font-weight: 600; color: var(--text-cream);">${c.name}</div>
+              <div style="font-size: 0.85rem; color: var(--text-dim); margin-top: 0.4rem;">${c.skills.join(' &bull; ')}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-family: var(--font-mono); font-size: 1.8rem; font-weight: 800; color: ${labelColor};">${res.totalScore.toFixed(0)}%</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function renderExcluded(excluded, listEl, btn) {
+      if (excluded.length === 0) {
+         btn.style.display = 'none';
+         listEl.innerHTML = '';
+         return;
+      }
+      
+      btn.style.display = 'inline-block';
+      btn.innerHTML = `<span style="font-weight:700;">${excluded.length} candidates excluded</span> &mdash; below eligibility requirements <span style="font-size:0.7rem; opacity:0.7;">(Toggle View)</span>`;
+      
+      excluded.sort((a, b) => b.totalScore - a.totalScore);
+      
+      listEl.innerHTML = excluded.map(res => {
+        const c = res.candidate;
+        return `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: rgba(255,255,255,0.02); border-radius: 4px;">
+            <div>
+              <div style="color: var(--text-muted); font-weight: 500; font-size: 0.95rem;">${c.name}</div>
+              <div style="font-size: 0.75rem; color: var(--text-dim); margin-top:0.2rem;">${c.skills.slice(0, 4).join(' &bull; ')}${c.skills.length > 4 ? ' &bull; ...' : ''}</div>
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 1rem; color: var(--text-dim); font-weight: 600;">${res.totalScore.toFixed(0)}%</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function displayMatchResult(res) {
+      const card = document.getElementById('match-result-card');
+      card.style.display = 'block';
+
+      const cName = res.candidateName || (res.candidate ? res.candidate.name : 'Applicant');
+      const jTitle = res.jobTitle || (res.job ? res.job.title : 'Role');
+      document.getElementById('result-title').innerText = `${cName} ➔ ${jTitle}`;
+      document.getElementById('result-total-score').innerText = res.totalScore.toFixed(1) + '%';
+      document.getElementById('result-skill-score').innerText = res.skillScore.toFixed(1) + ' / 80 pts';
+      document.getElementById('result-exp-score').innerText = res.experienceScore.toFixed(1) + ' / 20 pts';
+      document.getElementById('result-explanation').innerText = res.explanation;
+
+      document.getElementById('result-overlap-ratio').innerText = 
+        `${res.matchedSkills.length} of ${res.matchedSkills.length + res.missingSkills.length} required skills present`;
+
+      // Matched Skills Chips
+      const matchedEl = document.getElementById('result-matched-chips');
+      if (res.matchedSkills.length === 0) {
+        matchedEl.innerHTML = '<span style="color:var(--text-muted);font-size:0.82rem;">None matched.</span>';
+      } else {
+        matchedEl.innerHTML = res.matchedSkills.map(s => 
+          `<span class="skill-badge matched">✓ ${s}</span>`
+        ).join('');
+      }
+
+      // Missing Skills Chips
+      const missingEl = document.getElementById('result-missing-chips');
+      if (res.missingSkills.length === 0) {
+        missingEl.innerHTML = '<span style="color:var(--accent-green);font-size:0.82rem;">Zero skill gaps! Full requirement coverage.</span>';
+      } else {
+        missingEl.innerHTML = res.missingSkills.map(s => 
+          `<span class="skill-badge missing">✕ ${s}</span>`
+        ).join('');
+      }
+
+      card.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function loadMatrix() {
+      const container = document.getElementById('matrix-container');
+      try {
+        const data = await API.getMatchMatrix();
+        if (!data.matrix || !data.matrix.length) {
+          container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted);">No matrix data available.</div>';
+          return;
+        }
+
+        let html = '<table class="data-table" style="text-align:center;"><thead><tr><th style="text-align:left;">Applicant / Job</th>';
+        data.jobTitles.forEach(t => {
+          html += `<th style="text-align:center;min-width:110px;">${t}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+
+        data.candidateNames.forEach((name, i) => {
+          html += `<tr><td style="text-align:left;font-weight:700;color:var(--text-cream);">${name}</td>`;
+          data.matrix[i].forEach(score => {
+            let color = 'var(--text-muted)';
+            let bg = 'transparent';
+            if (score >= 80) {
+              color = 'var(--signal-lime)';
+              bg = 'var(--signal-lime-bg)';
+            } else if (score >= 50) {
+              color = 'var(--text-cream)';
+              bg = 'rgba(255,255,255,0.04)';
+            }
+            html += `<td style="font-family:var(--font-mono);font-weight:700;color:${color};background:${bg};">${score.toFixed(0)}%</td>`;
+          });
+          html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = '<div style="color:var(--alert-red-light);padding:1rem;">Failed to load compatibility matrix: ' + err.message + '</div>';
+      }
+    }
+
+    document.getElementById('refresh-matrix-btn').addEventListener('click', loadMatrix);
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
